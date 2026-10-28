@@ -19,3 +19,5 @@ Below is the complete set of 11 project documentation deliverables created for t
 9. [PDCA_Log.md](PDCA_Log.md): Structured Plan-Do-Check-Act improvement logs across 4 continuous improvement cycles.
 10. [User_Manual.md](User_Manual.md): Complete end-user operating manual with step-by-step guides for CRUD, adjustments, and TQM analytics.
 11. [Known_Limitations.md](Known_Limitations.md): Transparent disclosure of single-user desktop scope, SQLite concurrency limits, and future roadmap.
+12. [Presentation_Deck.md](Presentation_Deck.md): Review 1 & Review 2 comprehensive slide-by-slide script, speaker notes, and viva defense guide.
+13. [BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx](BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx): Professional 24-slide PowerPoint presentation deck formatted for 16:9 widescreen displays.

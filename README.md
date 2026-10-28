@@ -26,6 +26,27 @@
 
 ---
 
+## 📊 Academic Presentation & Viva Defense (Review 1 & Review 2)
+
+An executive **24-slide presentation deck** formatted for 16:9 widescreen displays has been generated for the university evaluation committee:
+
+- 📽️ **PowerPoint Presentation File**: [`docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx`](docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx)
+- 📝 **Slide-by-Slide Script & Viva Defense Guide**: [`docs/Presentation_Deck.md`](docs/Presentation_Deck.md)
+- 📊 **Visual Diagrams & High-Res Artifacts**:
+  - [Dashboard & System Preview](docs/screenshots/dashboard_ui_overview.png)
+  - [Animated Category Valuation Breakdown](docs/screenshots/category_valuation_chart.png)
+  - [Pareto Analysis (80/20 Rule)](docs/screenshots/pareto_analysis_chart.png)
+  - [CTQ Compliance Scorecard](docs/screenshots/ctq_scorecard.png)
+  - [Poka-Yoke 3-Tier CRUD Flow](docs/screenshots/crud_poka_yoke_flow.png)
+  - [4M Ishikawa Fishbone Root Cause Diagram](docs/screenshots/fishbone_diagram.png)
+  - [5-Pillar SIPOC Supply Chain Workflow](docs/screenshots/sipoc_workflow.png)
+
+### Review 1 & Review 2 Coverage Summary
+- **Review 1 (Process & System Design)**: Project Identity, 3 Quality Pillars, Problem Statement, Stakeholders & Needs, Measurable Viva Metrics, Objectives O1-O5, Scope & Roles, Q07 5 Features, Feature-to-TQM Dimensions mapping, SIPOC Diagram, Clean Code "Screen Never Writes SQL" rule, and Relational Schema integrity.
+- **Review 2 (Implementation & Quality Verification)**: Working Desktop CustomTkinter Application, CRUD Lifecycle, Stock Variance Wizard, JSON Audit Trail, CTQ Scorecard, Pareto Chart, Fishbone Diagram, FMEA ($RPN = S \times O \times D$), Audit Log-to-FMEA Continuous Feedback Loop, Deming's PDCA Cycle, and 42/42 Automated pytest test results.
+
+---
+
 ## 📸 Visual Showcase & UI Previews
 
 ### 1. Executive Dashboard & System Architecture Overview
@@ -42,6 +63,18 @@
 ### 4. Critical to Quality (CTQ) Compliance Scorecard
 *Dynamic scorecard continuously measuring 5 quality characteristics against a 100% target directly from relational database tables.*
 ![CTQ Scorecard](docs/screenshots/ctq_scorecard.png)
+
+### 5. Poka-Yoke 3-Tier CRUD Lifecycle & Gate Architecture
+*Architectural workflow illustrating how inputs pass through UI masking, domain validation, and database constraints before JSON audit logging.*
+![Poka-Yoke CRUD Flow](docs/screenshots/crud_poka_yoke_flow.png)
+
+### 6. 4M Ishikawa Fishbone Root Cause Diagram
+*Systematic root cause decomposition across Man, Machine, Method, and Material driving data inaccuracy.*
+![Ishikawa Fishbone Diagram](docs/screenshots/fishbone_diagram.png)
+
+### 7. End-to-End SIPOC Process Workflow
+*5-column supply chain and operational data flow connecting external suppliers with downstream executive customers.*
+![SIPOC Workflow](docs/screenshots/sipoc_workflow.png)
 
 ---
 
@@ -242,6 +275,8 @@ In-depth documentation deliverables are located in the [`docs/`](docs/) director
 8. [PDCA Continuous Improvement Log](docs/PDCA_Log.md)
 9. [End-User Operating Manual](docs/User_Manual.md)
 10. [Known Limitations & Engineering Assumptions](docs/Known_Limitations.md)
+11. [Academic Presentation Deck (Review 1 & Review 2)](docs/Presentation_Deck.md)
+12. [PowerPoint Presentation (.pptx)](docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx)
 
 ---
 
