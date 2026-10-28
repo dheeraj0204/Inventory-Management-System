@@ -585,52 +585,180 @@ class TQMView(ctk.CTkFrame):
         p_rows = [p.to_dict() for p in pdca_items]
         self.table_pdca.set_data(p_rows)
 
+        self._pareto_anim_timer = None
+
     def _render_pareto_chart(self):
+        # Cancel any previous animation
+        if hasattr(self, "_pareto_anim_timer") and self._pareto_anim_timer:
+            try:
+                self.after_cancel(self._pareto_anim_timer)
+            except Exception:
+                pass
+            self._pareto_anim_timer = None
+
         if self.pareto_canvas_widget:
             self.pareto_canvas_widget.destroy()
 
         pareto_data = tqm_service.calculate_pareto_data()
 
-        fig = Figure(figsize=(5.5, 3.8), dpi=100)
+        fig = Figure(figsize=(5.6, 3.8), dpi=100)
         fig.patch.set_facecolor("#F8FAFC")
         ax1 = fig.add_subplot(111)
         ax1.set_facecolor("#FFFFFF")
 
         if pareto_data["categories"]:
             cats = pareto_data["categories"]
-            counts = pareto_data["counts"]
-            cum_pcts = pareto_data["cumulative_percentages"]
+            counts = [float(c) for c in pareto_data["counts"]]
+            cum_pcts = [float(p) for p in pareto_data["cumulative_percentages"]]
+            total_defects = int(pareto_data["total_defects"])
+            vital_few = set(pareto_data["vital_few"])
 
-            # Bar plot on primary y-axis
-            bars = ax1.bar(cats, counts, color="#2563EB", width=0.55, alpha=0.9, label="Defect Count")
+            # Base colors: highlight vital few categories with stronger indigo
+            base_color = "#2563EB"
+            vital_color = "#1D4ED8"
+            bar_colors = [vital_color if c in vital_few else base_color for c in cats]
+
+            # Start bars at 0 for animation
+            bars = ax1.bar(
+                cats,
+                [0.0] * len(cats),
+                color=bar_colors,
+                width=0.55,
+                alpha=0.92,
+                label="Defect Count",
+                zorder=3,
+            )
             ax1.set_ylabel("Defect Frequency (Count)", color="#2563EB", fontsize=9, fontweight="bold")
+            ax1.set_title("[Interactive] Hover over bars or curve to view defect analytics", fontsize=8, color="#0284C7", pad=6)
             ax1.tick_params(axis="y", labelcolor="#2563EB", labelsize=8)
             ax1.tick_params(axis="x", labelrotation=25, labelsize=8, colors="#334155")
-            ax1.set_ylim(0, max(counts) * 1.25 if counts else 10)
+            max_c = max(counts) if counts else 10.0
+            ax1.set_ylim(0, max_c * 1.30)
+            ax1.grid(axis="y", linestyle="--", alpha=0.3, color="#CBD5E1", zorder=1)
 
             # Cumulative % on secondary y-axis
             ax2 = ax1.twinx()
-            ax2.plot(cats, cum_pcts, color="#DC2626", marker="o", linewidth=2.0, markersize=5, label="Cumulative %")
+            (line,) = ax2.plot(
+                cats,
+                [0.0] * len(cats),
+                color="#DC2626",
+                marker="o",
+                linewidth=2.2,
+                markersize=6,
+                label="Cumulative %",
+                zorder=5,
+            )
             ax2.set_ylabel("Cumulative Percentage (%)", color="#DC2626", fontsize=9, fontweight="bold")
             ax2.tick_params(axis="y", labelcolor="#DC2626", labelsize=8)
-            ax2.set_ylim(0, 110)
+            ax2.set_ylim(0, 115)
 
             # 80% Cutoff Reference Line
-            ax2.axhline(80, color="#16A34A", linestyle="--", linewidth=1.5, alpha=0.8, label="80% Cutoff Line")
+            ax2.axhline(80, color="#16A34A", linestyle="--", linewidth=1.6, alpha=0.85, label="80% Cutoff Line", zorder=4)
             ax2.text(
                 len(cats) - 1,
                 82,
-                "80% Threshold",
+                "80% Threshold (Vital Few)",
                 color="#16A34A",
                 fontsize=8,
                 fontweight="bold",
                 ha="right",
             )
 
-            # Annotate bar counts
-            for bar in bars:
-                h = bar.get_height()
-                ax1.text(bar.get_x() + bar.get_width() / 2, h + 0.3, f"{int(h)}", ha="center", va="bottom", fontsize=8, color="#0F172A", fontweight="bold")
+            # Bar text annotations
+            value_texts = []
+            for i in range(len(cats)):
+                txt = ax1.text(
+                    i,
+                    0,
+                    "",
+                    ha="center",
+                    va="bottom",
+                    fontsize=8,
+                    color="#0F172A",
+                    fontweight="bold",
+                    zorder=6,
+                )
+                value_texts.append(txt)
+
+            # Interactive Hover Tooltip Box
+            annot = ax1.annotate(
+                "",
+                xy=(0, 0),
+                xytext=(0, 18),
+                textcoords="offset points",
+                bbox=dict(
+                    boxstyle="round,pad=0.65,rounding_size=0.35",
+                    fc="#0F172A",
+                    ec="#10B981",
+                    lw=1.6,
+                    alpha=0.96,
+                ),
+                color="#FFFFFF",
+                fontsize=8.5,
+                ha="center",
+                va="bottom",
+                zorder=12,
+            )
+            annot.set_visible(False)
+
+            # Prepare tooltip data
+            bar_tooltips = []
+            for i, cat in enumerate(cats):
+                cnt = int(counts[i])
+                cum_p = cum_pcts[i]
+                single_p = (cnt / total_defects * 100) if total_defects > 0 else 0.0
+                is_vital = cat in vital_few
+                v_badge = "[Vital Few - 80% Cutoff]" if is_vital else "[Useful Many]"
+                t_str = f"Defect: {cat}\nFrequency: {cnt} defects ({single_p:.1f}%)\nCumulative: {cum_p:.1f}%\nStatus: {v_badge}"
+                bar_tooltips.append(t_str)
+
+            # Hover event handler
+            def on_hover(event):
+                if event.inaxes not in (ax1, ax2):
+                    if annot.get_visible():
+                        annot.set_visible(False)
+                        for b, orig_c in zip(bars, bar_colors):
+                            b.set_facecolor(orig_c)
+                            b.set_edgecolor("none")
+                            b.set_alpha(0.92)
+                        canvas.draw_idle()
+                    return
+
+                hovered_idx = -1
+                for idx, b in enumerate(bars):
+                    contains, _ = b.contains(event)
+                    if contains:
+                        hovered_idx = idx
+                        break
+
+                if hovered_idx != -1:
+                    # Highlight hovered bar
+                    for idx, (b, orig_c) in enumerate(zip(bars, bar_colors)):
+                        if idx == hovered_idx:
+                            b.set_facecolor("#3B82F6")
+                            b.set_edgecolor("#0F172A")
+                            b.set_linewidth(1.8)
+                            b.set_alpha(1.0)
+                        else:
+                            b.set_facecolor(orig_c)
+                            b.set_edgecolor("none")
+                            b.set_alpha(0.35)
+
+                    target_bar = bars[hovered_idx]
+                    x_center = target_bar.get_x() + target_bar.get_width() / 2
+                    y_top = target_bar.get_height()
+                    annot.xy = (x_center, y_top)
+                    annot.set_text(bar_tooltips[hovered_idx])
+                    annot.set_visible(True)
+                    canvas.draw_idle()
+                else:
+                    if annot.get_visible():
+                        annot.set_visible(False)
+                        for b, orig_c in zip(bars, bar_colors):
+                            b.set_facecolor(orig_c)
+                            b.set_edgecolor("none")
+                            b.set_alpha(0.92)
+                        canvas.draw_idle()
 
             vital_str = ", ".join(pareto_data["vital_few"])
             self.lbl_vital_few.configure(
@@ -646,3 +774,39 @@ class TQMView(ctk.CTkFrame):
         canvas.draw()
         self.pareto_canvas_widget = canvas.get_tk_widget()
         self.pareto_canvas_widget.pack(fill="both", expand=True)
+
+        if pareto_data["categories"]:
+            canvas.mpl_connect("motion_notify_event", on_hover)
+
+            # Smooth animation for bars and cumulative line: 18 frames over ~270ms
+            total_frames = 18
+            def animate_pareto(frame=1):
+                if not self.winfo_exists() or not self.pareto_container.winfo_exists():
+                    return
+                t = frame / total_frames
+                ease = 1.0 - (1.0 - t) ** 3  # cubic ease-out
+
+                for b, target_h, txt in zip(bars, counts, value_texts):
+                    cur_h = target_h * ease
+                    b.set_height(cur_h)
+                    txt.set_position((b.get_x() + b.get_width() / 2, cur_h + max_c * 0.015))
+                    txt.set_text(f"{cur_h:.0f}")
+
+                # Animate line
+                cur_line_y = [p * ease for p in cum_pcts]
+                line.set_ydata(cur_line_y)
+
+                canvas.draw_idle()
+
+                if frame < total_frames:
+                    self._pareto_anim_timer = self.after(15, lambda: animate_pareto(frame + 1))
+                else:
+                    for b, target_h, txt in zip(bars, counts, value_texts):
+                        b.set_height(target_h)
+                        txt.set_position((b.get_x() + b.get_width() / 2, target_h + max_c * 0.015))
+                        txt.set_text(f"{int(target_h)}")
+                    line.set_ydata(cum_pcts)
+                    canvas.draw_idle()
+                    self._pareto_anim_timer = None
+
+            self._pareto_anim_timer = self.after(40, animate_pareto)
