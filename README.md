@@ -31,6 +31,7 @@
 An executive **24-slide presentation deck** formatted for 16:9 widescreen displays has been generated for the university evaluation committee:
 
 - 📽️ **PowerPoint Presentation File**: [`docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx`](docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx)
+- 📄 **Viva Defense Handbook (PDF)**: [`docs/BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf`](docs/BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf)
 - 📝 **Slide-by-Slide Script & Viva Defense Guide**: [`docs/Presentation_Deck.md`](docs/Presentation_Deck.md)
 - 📊 **Visual Diagrams & High-Res Artifacts**:
   - [Dashboard & System Preview](docs/screenshots/dashboard_ui_overview.png)
@@ -277,6 +278,7 @@ In-depth documentation deliverables are located in the [`docs/`](docs/) director
 10. [Known Limitations & Engineering Assumptions](docs/Known_Limitations.md)
 11. [Academic Presentation Deck (Review 1 & Review 2)](docs/Presentation_Deck.md)
 12. [PowerPoint Presentation (.pptx)](docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx)
+13. [Viva Defense Handbook (.pdf)](docs/BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf)
 
 ---
 

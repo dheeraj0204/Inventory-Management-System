@@ -21,3 +21,4 @@ Below is the complete set of 11 project documentation deliverables created for t
 11. [Known_Limitations.md](Known_Limitations.md): Transparent disclosure of single-user desktop scope, SQLite concurrency limits, and future roadmap.
 12. [Presentation_Deck.md](Presentation_Deck.md): Review 1 & Review 2 comprehensive slide-by-slide script, speaker notes, and viva defense guide.
 13. [BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx](BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx): Professional 24-slide PowerPoint presentation deck formatted for 16:9 widescreen displays.
+14. [BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf](BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf): Printable 9-page executive viva defense handbook containing the prototype elevator pitch, slide-wise Hinglish viva explanations, and top 7 counter-questions with winning answers.
