@@ -1,4 +1,4 @@
-# 📦 Inventory Management System — Improving Data Accuracy Using Total Quality Management (Q07)
+# 📦 Inventory Management System — Improving Data Accuracy Using Total Quality Management 
 
 <div align="center">
 
