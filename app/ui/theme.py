@@ -25,12 +25,16 @@ THEME = {
 
     # Status Colors (TQM / Data Integrity)
     "success": "#16A34A",             # Green 600
+    "success_hover": "#15803D",       # Green 700
     "success_bg": "#DCFCE7",          # Green 100
     "warning": "#D97706",             # Amber 600
+    "warning_hover": "#B45309",       # Amber 700
     "warning_bg": "#FEF3C7",          # Amber 100
     "danger": "#DC2626",              # Red 600
+    "danger_hover": "#B91C1C",        # Red 700
     "danger_bg": "#FEE2E2",           # Red 100
     "info": "#0284C7",                # Sky 600
+    "info_hover": "#0369A1",          # Sky 700
     "info_bg": "#E0F2FE",             # Sky 100
 
     # Typography Colors
