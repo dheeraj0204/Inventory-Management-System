@@ -1,19 +1,17 @@
 """Main Application Window with enterprise navigation sidebar and dynamic view container."""
 
-from typing import Dict
+from typing import Callable, Dict, Optional
 import customtkinter as ctk
 
 from app.config import (
     APP_TITLE,
-    STUDENT_NAME,
-    COURSE_NAME,
-    ACADEMIC_SESSION,
-    QUALITY_GOAL,
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
     MIN_WINDOW_HEIGHT,
 )
+from app.models.user import User
+from app.services.auth_service import auth_service
 from app.ui.theme import THEME, FONTS
 from app.ui.views import DashboardView, ProductsView, InventoryView, AuditView, TQMView
 
@@ -21,8 +19,15 @@ from app.ui.views import DashboardView, ProductsView, InventoryView, AuditView, 
 class AppWindow(ctk.CTk):
     """Main desktop application window container."""
 
-    def __init__(self):
+    def __init__(
+        self,
+        current_user: Optional[User] = None,
+        on_logout: Optional[Callable[[], None]] = None,
+    ):
         super().__init__()
+
+        self.current_user = current_user or auth_service.get_current_user()
+        self.on_logout = on_logout
 
         # Appearance & Window Configuration
         ctk.set_appearance_mode("light")
@@ -96,7 +101,7 @@ class AppWindow(ctk.CTk):
 
         badge = ctk.CTkLabel(
             brand_box,
-            text="ENTERPRISE TQM SUITE",
+            text="ENTERPRISE INVENTORY",
             font=FONTS["small_bold"],
             text_color="#38BDF8",  # Sky 400
             anchor="w",
@@ -114,9 +119,9 @@ class AppWindow(ctk.CTk):
 
         sub = ctk.CTkLabel(
             brand_box,
-            text=QUALITY_GOAL,
+            text="Stock Control & Audit Platform",
             font=FONTS["small"],
-            text_color="#A5B4FC",  # Indigo 300
+            text_color="#94A3B8",
             anchor="w",
         )
         sub.pack(fill="x")
@@ -140,8 +145,8 @@ class AppWindow(ctk.CTk):
             ("dashboard", "📊  Dashboard Overview"),
             ("products", "📦  Product Catalog"),
             ("inventory", "⚖️  Inventory & Stock"),
-            ("audit", "📜  Audit History (Q07)"),
-            ("tqm", "🎯  TQM Quality & Analytics"),
+            ("audit", "📜  Audit History"),
+            ("tqm", "🎯  Quality & Analytics"),
         ]
 
         for key, label in nav_items:
@@ -160,19 +165,55 @@ class AppWindow(ctk.CTk):
             btn.pack(fill="x", padx=12, pady=3)
             self.nav_buttons[key] = btn
 
-        # Bottom Academic Credentials Box
-        cred_box = ctk.CTkFrame(
+        # Bottom User Profile & Sign Out Box
+        user_card = ctk.CTkFrame(
             self.sidebar,
             fg_color="#090E17",
-            corner_radius=6,
+            corner_radius=8,
             border_width=1,
             border_color=THEME["sidebar_border"],
         )
-        cred_box.pack(fill="x", side="bottom", padx=12, pady=16)
+        user_card.pack(fill="x", side="bottom", padx=12, pady=16)
 
-        ctk.CTkLabel(cred_box, text=STUDENT_NAME, font=FONTS["body_bold"], text_color="#F8FAFC", anchor="w").pack(fill="x", padx=10, pady=(8, 2))
-        ctk.CTkLabel(cred_box, text=COURSE_NAME, font=FONTS["small"], text_color="#94A3B8", anchor="w").pack(fill="x", padx=10, pady=1)
-        ctk.CTkLabel(cred_box, text=f"Session: {ACADEMIC_SESSION}", font=FONTS["small"], text_color="#38BDF8", anchor="w").pack(fill="x", padx=10, pady=(1, 8))
+        user_name = self.current_user.full_name if self.current_user else "System Administrator"
+        user_role = self.current_user.role if self.current_user else "Admin"
+        user_handle = f"@{self.current_user.username}" if self.current_user else "@admin"
+
+        ctk.CTkLabel(
+            user_card,
+            text=f"👤 {user_name}",
+            font=FONTS["body_bold"],
+            text_color="#F8FAFC",
+            anchor="w",
+        ).pack(fill="x", padx=10, pady=(8, 1))
+
+        ctk.CTkLabel(
+            user_card,
+            text=f"{user_role} • {user_handle}",
+            font=FONTS["small"],
+            text_color="#38BDF8",
+            anchor="w",
+        ).pack(fill="x", padx=10, pady=(0, 8))
+
+        btn_logout = ctk.CTkButton(
+            user_card,
+            text="🚪 Sign Out / Logout",
+            font=FONTS["small_bold"],
+            fg_color="#1E293B",
+            hover_color=THEME["danger"],
+            text_color="#FCA5A5",
+            height=30,
+            corner_radius=4,
+            command=self._handle_logout,
+        )
+        btn_logout.pack(fill="x", padx=8, pady=(0, 8))
+
+    def _handle_logout(self):
+        """Terminates session, closes main window, and returns to authentication."""
+        auth_service.logout()
+        self.destroy()
+        if self.on_logout:
+            self.on_logout()
 
     def switch_view(self, view_key: str):
         """Swaps the active view in the main container and updates sidebar styling."""

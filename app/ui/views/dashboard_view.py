@@ -47,7 +47,7 @@ class DashboardView(ctk.CTkFrame):
 
         lbl_sub = ctk.CTkLabel(
             title_box,
-            text="Real-time SQLite relational metrics • TQM Q07 Data Accuracy Verification",
+            text="Real-time inventory valuation, stock movements, and operational metrics",
             font=FONTS["small"],
             text_color=THEME["text_muted"],
         )
@@ -389,6 +389,9 @@ class DashboardView(ctk.CTkFrame):
             return
 
         for act in activities:
+            entity_id = act["entity_id"]
+            is_product = str(entity_id).startswith("PRD-")
+
             item_box = ctk.CTkFrame(
                 self.activity_scroll,
                 fg_color=THEME["bg_main"],
@@ -435,3 +438,31 @@ class DashboardView(ctk.CTkFrame):
                 anchor="w",
             )
             lbl_desc.pack(fill="x", padx=10, pady=(0, 6))
+
+            # Deep-link click on product activity
+            if is_product:
+                def make_click_fn(pid):
+                    def _click(e):
+                        from app.services import product_service
+                        from app.ui.components import ProductDetailDialog
+                        p = product_service.get_product_by_id(pid)
+                        if p:
+                            ProductDetailDialog(self, product=p, on_data_change=self.refresh)
+                    return _click
+
+                click_fn = make_click_fn(entity_id)
+                item_box.configure(cursor="hand2")
+                item_box.bind("<Button-1>", click_fn)
+                top.bind("<Button-1>", click_fn)
+                lbl_badge.bind("<Button-1>", click_fn)
+                lbl_time.bind("<Button-1>", click_fn)
+                lbl_desc.bind("<Button-1>", click_fn)
+
+                def on_enter(e, b=item_box):
+                    b.configure(fg_color=THEME["table_header_bg"])
+
+                def on_leave(e, b=item_box):
+                    b.configure(fg_color=THEME["bg_main"])
+
+                item_box.bind("<Enter>", on_enter)
+                item_box.bind("<Leave>", on_leave)

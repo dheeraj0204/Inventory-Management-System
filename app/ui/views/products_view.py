@@ -6,7 +6,7 @@ import customtkinter as ctk
 from app.config import ALLOWED_CATEGORIES
 from app.models.product import Product
 from app.services import product_service
-from app.ui.components import AutocompleteEntry, ConfirmDialog, TableView
+from app.ui.components import AutocompleteEntry, ConfirmDialog, TableView, ProductDetailDialog
 from app.ui.theme import THEME, FONTS
 from app.utils.validators import ProductValidator, ValidationError
 
@@ -414,6 +414,7 @@ class ProductsView(ctk.CTkFrame):
         self.table = TableView(
             self,
             columns=table_columns,
+            on_select=self._on_table_row_click,
             empty_text="No products matching the search query or category filter.",
         )
         self.table.pack(fill="both", expand=True)
@@ -445,6 +446,7 @@ class ProductsView(ctk.CTkFrame):
             })
 
         action_buttons = [
+            {"name": "view", "label": "👁️ Details", "color": THEME["secondary"], "width": 72},
             {"name": "edit", "label": "Edit", "color": THEME["primary"], "width": 48},
             {"name": "delete", "label": "Delete", "color": THEME["danger"], "width": 54},
         ]
@@ -468,9 +470,20 @@ class ProductsView(ctk.CTkFrame):
     def _open_add_dialog(self):
         ProductModalDialog(self, on_save_success=self._on_product_saved)
 
+    def _open_product_details(self, product: Product):
+        """Opens deep-link detail dialog with working edit controls."""
+        ProductDetailDialog(self, product=product, on_data_change=self.refresh)
+
+    def _on_table_row_click(self, row: Dict[str, Any]):
+        """Callback when user clicks directly on a product row."""
+        if "_raw" in row and isinstance(row["_raw"], Product):
+            self._open_product_details(row["_raw"])
+
     def _handle_row_action(self, action: str, row: Dict[str, Any]):
         product: Product = row["_raw"]
-        if action == "edit":
+        if action == "view":
+            self._open_product_details(product)
+        elif action == "edit":
             ProductModalDialog(self, product=product, on_save_success=self._on_product_saved)
         elif action == "delete":
             self._handle_delete_product(product)

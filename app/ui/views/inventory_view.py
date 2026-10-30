@@ -6,7 +6,7 @@ import customtkinter as ctk
 from app.config import STOCK_ADJUSTMENT_REASONS
 from app.models.product import Product
 from app.services import inventory_service, product_service
-from app.ui.components import ConfirmDialog, TableView
+from app.ui.components import ConfirmDialog, TableView, ProductDetailDialog
 from app.ui.theme import THEME, FONTS
 from app.utils.validators import ProductValidator, ValidationError
 
@@ -392,7 +392,11 @@ class InventoryView(ctk.CTkFrame):
             {"key": "valuation", "title": "Valuation", "width": 100, "align": "e"},
             {"key": "status", "title": "Stock Health", "width": 95, "align": "center"},
         ]
-        self.table_stock = TableView(self.tab_stock, columns=cols)
+        self.table_stock = TableView(
+            self.tab_stock,
+            columns=cols,
+            on_select=self._on_stock_row_click,
+        )
         self.table_stock.pack(fill="both", expand=True, padx=8, pady=(0, 8))
 
     def _build_movements_tab(self):
@@ -446,6 +450,7 @@ class InventoryView(ctk.CTkFrame):
             })
 
         action_buttons = [
+            {"name": "view", "label": "👁️ Details", "color": THEME["secondary"], "width": 72},
             {"name": "adjust", "label": "Adjust", "color": THEME["warning"], "width": 55},
         ]
 
@@ -493,9 +498,16 @@ class InventoryView(ctk.CTkFrame):
     def _open_adjust_modal(self, product: Optional[Product] = None):
         StockAdjustmentModal(self, product=product, on_success=self._on_adjusted)
 
+    def _on_stock_row_click(self, row: Dict[str, Any]):
+        """Deep-link inspection when clicking on a row in the stock table."""
+        if "_raw" in row and isinstance(row["_raw"], Product):
+            ProductDetailDialog(self, product=row["_raw"], on_data_change=self.refresh)
+
     def _handle_stock_action(self, action: str, row: Dict[str, Any]):
-        if action == "adjust":
-            product: Product = row["_raw"]
+        product: Product = row["_raw"]
+        if action == "view":
+            ProductDetailDialog(self, product=product, on_data_change=self.refresh)
+        elif action == "adjust":
             self._open_adjust_modal(product)
 
     def _on_adjusted(self):

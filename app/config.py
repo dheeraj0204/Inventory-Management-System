@@ -18,11 +18,11 @@ DEFAULT_DB_PATH = DATA_DIR / "inventory_tqm.db"
 LOG_FILE_PATH = LOGS_DIR / "app.log"
 
 # Application Metadata
-APP_TITLE = "Enterprise Inventory Management System — TQM Q07"
-STUDENT_NAME = "Dheeraj Khetwal"
-COURSE_NAME = "BBAT104 — Fundamentals of Total Quality Management"
+APP_TITLE = "Inventory Management System"
+STUDENT_NAME = ""
+COURSE_NAME = ""
 ACADEMIC_SESSION = "2026–27"
-QUALITY_GOAL = "Q07 — Improve Data Accuracy"
+QUALITY_GOAL = "Data Accuracy & Inventory Control"
 VERSION = "1.0.0"
 
 # Controlled Dropdown Categories (Q07 Feature 2)

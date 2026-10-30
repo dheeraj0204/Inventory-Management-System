@@ -18,7 +18,7 @@ class TestTQMService:
             occurrence=4,
             detection=5,
             recommended_action="Implement mandatory digital calibration schedule",
-            owner="Dheeraj Khetwal",
+            owner="Quality Lead",
         )
         # Expected RPN = 8 * 4 * 5 = 160
         assert item.rpn == 160
@@ -100,11 +100,11 @@ class TestTQMService:
 
     def test_pdca_lifecycle(self, test_tqm_service):
         record = test_tqm_service.add_pdca_record(
-            title="Q07 Data Cleansing Project",
+            title="Inventory Data Cleansing Project",
             stage="PLAN",
             problem_statement="High frequency of manual SKU duplicate clashes",
             plan_description="Implement SQLite UNIQUE constraint and pre-save query",
-            owner="Dheeraj Khetwal",
+            owner="Operations Lead",
         )
         assert record.stage == "PLAN"
         assert record.status == "Planned"

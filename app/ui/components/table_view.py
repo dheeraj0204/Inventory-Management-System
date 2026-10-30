@@ -97,6 +97,23 @@ class TableView(ctk.CTkFrame):
             )
             row_frame.pack(fill="x", pady=1)
 
+            # Deep-link click & hover handlers
+            if self.on_select:
+                def make_click_handler(data):
+                    return lambda event: self.on_select(data)
+
+                def make_hover_enter(f):
+                    return lambda e: f.configure(fg_color=THEME["table_header_bg"])
+
+                def make_hover_leave(f, bg):
+                    return lambda e: f.configure(fg_color=bg)
+
+                click_handler = make_click_handler(row_data)
+                row_frame.bind("<Button-1>", click_handler)
+                row_frame.configure(cursor="hand2")
+                row_frame.bind("<Enter>", make_hover_enter(row_frame))
+                row_frame.bind("<Leave>", make_hover_leave(row_frame, row_bg))
+
             # Render standard columns
             for col in self.columns:
                 key = col["key"]
@@ -123,6 +140,9 @@ class TableView(ctk.CTkFrame):
                     anchor=align,
                 )
                 lbl.pack(side="left", padx=6, pady=4)
+                if self.on_select:
+                    lbl.bind("<Button-1>", click_handler)
+                    lbl.configure(cursor="hand2")
 
             # Render action buttons if defined
             if action_buttons and action_callback:

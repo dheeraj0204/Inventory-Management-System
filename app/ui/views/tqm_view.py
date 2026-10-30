@@ -214,8 +214,8 @@ class AddFMEAModal(ctk.CTkToplevel):
         self.entry_rec.pack(fill="x", pady=(2, 8))
 
         ctk.CTkLabel(body, text="Action Owner *", font=FONTS["small_bold"], text_color=THEME["text_body"]).pack(anchor="w")
-        self.entry_owner = ctk.CTkEntry(body, placeholder_text="e.g. Dheeraj Khetwal", height=32, font=FONTS["body"])
-        self.entry_owner.insert(0, "Dheeraj Khetwal")
+        self.entry_owner = ctk.CTkEntry(body, placeholder_text="e.g. Quality Lead", height=32, font=FONTS["body"])
+        self.entry_owner.insert(0, "Quality Lead")
         self.entry_owner.pack(fill="x", pady=(2, 12))
 
         # Bottom
@@ -293,7 +293,7 @@ class TQMView(ctk.CTkFrame):
 
         lbl_sub = ctk.CTkLabel(
             title_box,
-            text="BBAT104 Course Project: CTQ • Checksheets • Pareto (80/20) • Fishbone • FMEA • SIPOC • PDCA",
+            text="Enterprise Quality Control: CTQ • Checksheets • Pareto (80/20) • Fishbone • FMEA • SIPOC • PDCA",
             font=FONTS["small"],
             text_color=THEME["text_muted"],
         )
@@ -427,7 +427,7 @@ class TQMView(ctk.CTkFrame):
     def _build_fishbone_tab(self):
         lbl = ctk.CTkLabel(
             self.tab_fishbone,
-            text="ISHIKAWA CAUSE-AND-EFFECT (FISHBONE) DIAGRAM: INVENTORY DATA INACCURACY (Q07)",
+            text="ISHIKAWA CAUSE-AND-EFFECT (FISHBONE) DIAGRAM: INVENTORY ROOT CAUSE ANALYSIS",
             font=FONTS["h3"],
             text_color=THEME["text_muted"],
         )

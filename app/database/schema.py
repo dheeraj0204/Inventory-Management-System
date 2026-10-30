@@ -112,6 +112,22 @@ CREATE TABLE IF NOT EXISTS pdca_records (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+
+-- 7. Application Users Table (Authentication & RBAC)
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_hash TEXT NOT NULL,
+    salt TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE COLLATE NOCASE,
+    role TEXT NOT NULL DEFAULT 'Manager' CHECK (role IN ('Admin', 'Manager', 'Staff')),
+    created_at TEXT NOT NULL,
+    last_login TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 """
 
 
@@ -127,8 +143,16 @@ def initialize_database(manager: DatabaseManager = db_manager) -> None:
     with manager.transaction() as conn:
         conn.executescript(SCHEMA_SQL)
 
-        # Check if products table has existing records
         cursor = conn.cursor()
+
+        # Check if users table has existing accounts
+        cursor.execute("SELECT COUNT(*) AS count FROM users")
+        user_count = cursor.fetchone()["count"]
+        if user_count == 0:
+            logger.info("Seeding initial administrator and staff user accounts...")
+            seed_initial_users(conn)
+
+        # Check if products table has existing records
         cursor.execute("SELECT COUNT(*) AS count FROM products")
         product_count = cursor.fetchone()["count"]
 
@@ -249,7 +273,7 @@ def seed_initial_fmea(conn: sqlite3.Connection) -> None:
             "Visual check by operator",
             7, 6, 6, 252, # RPN = 7 * 6 * 6 = 252
             "Implement automated SKU regex mask and verification button",
-            "Quality Engineer (Dheeraj K.)",
+            "Quality Lead",
             "Implemented",
             timestamp,
         ),
@@ -319,7 +343,7 @@ def seed_initial_pdca(conn: sqlite3.Connection) -> None:
     timestamp = current_iso_time()
     sample_pdca = [
         (
-            "Q07 Phase 1: Input Quality Control & Masking",
+            "Phase 1: Input Quality Control & Masking",
             "ACT",
             "High rate of invalid numeric entries and negative stock in legacy inventory system.",
             "Design input validation rules, masking, and regex checks for all user entry forms.",
@@ -328,13 +352,13 @@ def seed_initial_pdca(conn: sqlite3.Connection) -> None:
             "Achieved 100% rejection rate for malformed data inputs in automated testing.",
             "Unit test suite validating 15 boundary cases; zero validation bypasses in audit log.",
             "Standardize ProductValidator as mandatory gatekeeper for all data entry endpoints.",
-            "Dheeraj Khetwal (Student Lead)",
+            "Operations Lead",
             "Completed",
             timestamp,
             timestamp,
         ),
         (
-            "Q07 Phase 2: Category Standardization & Referential Integrity",
+            "Phase 2: Category Standardization & Referential Integrity",
             "ACT",
             "Fragmented category naming (e.g. 'Elec', 'Electronics', 'ELECT') distorting inventory analytics.",
             "Enforce controlled category dropdown selector restricting entries to 6 standardized groups.",
@@ -343,13 +367,13 @@ def seed_initial_pdca(conn: sqlite3.Connection) -> None:
             "Audit records show 100% compliance with master category catalog.",
             "Database integrity scan querying distinct categories; verified exact match to allowed list.",
             "Document master category catalog in System Architecture documentation.",
-            "Dheeraj Khetwal (Student Lead)",
+            "Operations Lead",
             "Completed",
             timestamp,
             timestamp,
         ),
         (
-            "Q07 Phase 3: Transactional Audit Trail & Change Logging",
+            "Phase 3: Transactional Audit Trail & Change Logging",
             "DO",
             "Lack of traceability for unauthorized stock adjustments and missing accountability.",
             "Architect dedicated audit_logs table capturing JSON diffs of previous and updated values.",
@@ -358,7 +382,7 @@ def seed_initial_pdca(conn: sqlite3.Connection) -> None:
             "In progress: verifying audit log viewer performance with large log volumes.",
             "Verify matching audit record exists for every product table row modification.",
             "Deploy audit log export and search filtering in management dashboard.",
-            "Dheeraj Khetwal (Student Lead)",
+            "Operations Lead",
             "In Progress",
             timestamp,
             timestamp,
@@ -375,3 +399,36 @@ def seed_initial_pdca(conn: sqlite3.Connection) -> None:
             """,
             r,
         )
+
+
+def seed_initial_users(conn: sqlite3.Connection) -> None:
+    """Seeds default system user accounts for authentication and role-based access."""
+    import hashlib
+    import secrets
+
+    def hash_pwd(pwd: str) -> tuple[str, str]:
+        salt = secrets.token_hex(16)
+        key = hashlib.pbkdf2_hmac("sha256", pwd.encode("utf-8"), salt.encode("utf-8"), 100000)
+        return key.hex(), salt
+
+    timestamp = current_iso_time()
+
+    admin_hash, admin_salt = hash_pwd("admin123")
+    manager_hash, manager_salt = hash_pwd("manager123")
+    staff_hash, staff_salt = hash_pwd("staff123")
+
+    sample_users = [
+        ("admin", admin_hash, admin_salt, "System Administrator", "admin@inventory.local", "Admin", timestamp),
+        ("manager", manager_hash, manager_salt, "Inventory Manager", "manager@inventory.local", "Manager", timestamp),
+        ("staff", staff_hash, staff_salt, "Warehouse Staff", "staff@inventory.local", "Staff", timestamp),
+    ]
+
+    for u in sample_users:
+        conn.execute(
+            """
+            INSERT INTO users (username, password_hash, salt, full_name, email, role, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            u,
+        )
+

@@ -10,7 +10,7 @@ from app.utils.validators import ProductValidator, ValidationError
 
 
 class TQMService:
-    """Implements statistical quality control and continuous improvement algorithms for BBAT104."""
+    """Implements statistical quality control and continuous improvement algorithms."""
 
     def __init__(self, manager: DatabaseManager = db_manager):
         self.manager = manager

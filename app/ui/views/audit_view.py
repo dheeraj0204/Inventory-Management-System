@@ -130,7 +130,7 @@ class AuditView(ctk.CTkFrame):
 
         lbl_title = ctk.CTkLabel(
             title_box,
-            text="Transactional Audit Trail (Q07 Feature 5)",
+            text="Transactional Audit Trail & Activity Logs",
             font=FONTS["h1"],
             text_color=THEME["text_dark"],
         )

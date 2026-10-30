@@ -8,6 +8,7 @@ from app.services.product_service import ProductService
 from app.services.inventory_service import InventoryService
 from app.services.audit_service import AuditService
 from app.services.tqm_service import TQMService
+from app.services.auth_service import AuthService
 
 
 @pytest.fixture
@@ -37,3 +38,8 @@ def test_audit_service(test_db_manager):
 @pytest.fixture
 def test_tqm_service(test_db_manager):
     return TQMService(test_db_manager)
+
+
+@pytest.fixture
+def test_auth_service(test_db_manager):
+    return AuthService(test_db_manager)
