@@ -279,6 +279,7 @@ In-depth documentation deliverables are located in the [`docs/`](docs/) director
 11. [Academic Presentation Deck (Review 1 & Review 2)](docs/Presentation_Deck.md)
 12. [PowerPoint Presentation (.pptx)](docs/BBAT104_TQM_Q07_Review1_Review2_Presentation.pptx)
 13. [Viva Defense Handbook (.pdf)](docs/BBAT104_TQM_Q07_Viva_Defense_Handbook.pdf)
+14. [ERP Benchmark & 10-Process Workflow Mapping](docs/ERP_Benchmark_and_Workflow_Mapping.md)
 
 ---
 
