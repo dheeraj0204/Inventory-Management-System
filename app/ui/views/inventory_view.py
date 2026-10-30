@@ -370,7 +370,19 @@ class InventoryView(ctk.CTkFrame):
             height=32,
             command=self._toggle_low_stock_filter,
         )
-        self.btn_filter_low.pack(side="left")
+        self.btn_filter_low.pack(side="left", padx=(0, 8))
+
+        btn_adjust_wizard = ctk.CTkButton(
+            toolbar,
+            text="⚖️ Stock Adjustment Wizard",
+            font=FONTS["small_bold"],
+            fg_color=THEME["warning"],
+            hover_color=THEME["warning_hover"],
+            text_color="#FFFFFF",
+            height=32,
+            command=self._open_adjust_modal,
+        )
+        btn_adjust_wizard.pack(side="left")
 
         self.lbl_stock_count = ctk.CTkLabel(
             toolbar,
@@ -450,8 +462,9 @@ class InventoryView(ctk.CTkFrame):
             })
 
         action_buttons = [
-            {"name": "view", "label": "👁️ Details", "color": THEME["secondary"], "width": 72},
-            {"name": "adjust", "label": "Adjust", "color": THEME["warning"], "width": 55},
+            {"name": "view", "label": "👁️ Details", "color": THEME["secondary"], "width": 68},
+            {"name": "edit", "label": "✏️ Edit Item", "color": THEME["primary"], "width": 78},
+            {"name": "adjust", "label": "⚖️ Adjust Stock", "color": THEME["warning"], "width": 88},
         ]
 
         self.table_stock.set_data(
@@ -507,8 +520,16 @@ class InventoryView(ctk.CTkFrame):
         product: Product = row["_raw"]
         if action == "view":
             ProductDetailDialog(self, product=product, on_data_change=self.refresh)
+        elif action == "edit":
+            from app.ui.views.products_view import ProductModalDialog
+            ProductModalDialog(self, product=product, on_save_success=lambda _: self._on_product_updated())
         elif action == "adjust":
             self._open_adjust_modal(product)
+
+    def _on_product_updated(self):
+        self.refresh()
+        if self.on_data_change:
+            self.on_data_change()
 
     def _on_adjusted(self):
         self.refresh()

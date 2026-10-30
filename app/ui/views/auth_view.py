@@ -215,32 +215,81 @@ class AuthWindow(ctk.CTk):
         )
         btn_signin.pack(fill="x", pady=(4, 16))
 
-        # Demo Credentials Helper Card
+        # Demo Credentials Helper Card with 1-Click Autofill Buttons
         demo_card = ctk.CTkFrame(
             self.form_container,
             fg_color="#0F172A",
-            corner_radius=6,
+            corner_radius=8,
             border_width=1,
             border_color="#1E293B",
         )
-        demo_card.pack(fill="x", pady=(4, 8), ipadx=8, ipady=8)
+        demo_card.pack(fill="x", pady=(4, 8), ipadx=6, ipady=6)
 
         ctk.CTkLabel(
             demo_card,
-            text="🔑 PRE-CONFIGURED DEMO ACCOUNTS",
+            text="🔑 PRE-CONFIGURED DEMO ACCOUNTS (1-CLICK AUTOFILL)",
             font=FONTS["small_bold"],
             text_color="#38BDF8",
             anchor="w",
-        ).pack(fill="x", padx=10, pady=(2, 4))
+        ).pack(fill="x", padx=10, pady=(4, 6))
 
-        ctk.CTkLabel(
-            demo_card,
-            text="• Admin: admin / admin123\n• Manager: manager / manager123\n• Staff: staff / staff123",
-            font=FONTS["small"],
-            text_color="#94A3B8",
-            justify="left",
-            anchor="w",
-        ).pack(fill="x", padx=10, pady=(0, 2))
+        demo_accounts = [
+            ("Admin", "admin", "admin123", "#38BDF8"),
+            ("Manager", "manager", "manager123", "#A78BFA"),
+            ("Staff", "staff", "staff123", "#34D399"),
+        ]
+
+        for role_name, u_name, p_word, color in demo_accounts:
+            row = ctk.CTkFrame(demo_card, fg_color="#131B2E", corner_radius=6)
+            row.pack(fill="x", padx=8, pady=3, ipadx=4, ipady=3)
+
+            # Role badge tag
+            tag = ctk.CTkLabel(
+                row,
+                text=f" {role_name} ",
+                font=FONTS["small_bold"],
+                fg_color=color,
+                text_color="#0F172A",
+                corner_radius=4,
+                width=58,
+                height=22,
+            )
+            tag.pack(side="left", padx=(6, 8))
+
+            # Username & Password label
+            lbl_creds = ctk.CTkLabel(
+                row,
+                text=f"{u_name}  •  pass: {p_word}",
+                font=FONTS["small"],
+                text_color="#CBD5E1",
+            )
+            lbl_creds.pack(side="left", padx=2)
+
+            # "⚡ Use" Button
+            btn_use = ctk.CTkButton(
+                row,
+                text="⚡ Use",
+                font=FONTS["small_bold"],
+                fg_color=THEME["primary"],
+                hover_color=THEME["primary_hover"],
+                text_color="#FFFFFF",
+                width=58,
+                height=24,
+                corner_radius=4,
+                command=lambda u=u_name, p=p_word, r=role_name: self._autofill_demo(u, p, r),
+            )
+            btn_use.pack(side="right", padx=(0, 6))
+
+    def _autofill_demo(self, username: str, password: str, role: str):
+        """Autofills selected demo credentials into the input fields."""
+        self.login_user_entry.delete(0, "end")
+        self.login_user_entry.insert(0, username)
+
+        self.login_pwd_entry.delete(0, "end")
+        self.login_pwd_entry.insert(0, password)
+
+        self._show_message(f"Autofilled {role} credentials (@{username}). Click 'Sign In' or press Enter to login!", is_error=False)
+        self.login_pwd_entry.focus_set()
 
     def _toggle_password_visibility(self):
         self.show_password = not self.show_password
