@@ -45,6 +45,7 @@ logs/
 # SQLite databases (exclude local test/dev databases with personal/scratch data)
 *.db
 *.sqlite3
+app.tar.gz
 
 # OS generated files
 Thumbs.db

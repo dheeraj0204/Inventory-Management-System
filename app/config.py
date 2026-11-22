@@ -6,8 +6,8 @@ from pathlib import Path
 # Base Paths
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parent
-DATA_DIR = PROJECT_ROOT / "data"
-LOGS_DIR = PROJECT_ROOT / "logs"
+DATA_DIR = Path(os.environ.get("DATA_DIR", PROJECT_ROOT / "data"))
+LOGS_DIR = DATA_DIR / "logs" if "DATA_DIR" in os.environ else PROJECT_ROOT / "logs"
 
 # Ensure runtime directories exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_title }} | Enterprise Quality Cockpit</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              cyan: '#06B6D4',
+              emerald: '#10B981',
+              amber: '#F59E0B',
+              rose: '#F43F5E'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2.5s infinite ease-in-out',
+            'shimmer': 'shimmer 2s infinite linear',
+            'float': 'float 4s infinite ease-in-out',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 15px rgba(99, 102, 241, 0.4), inset 0 0 10px rgba(99, 102, 241, 0.2)' },
+              '50%': { boxShadow: '0 0 25px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Styling & Micro-Interactions */
+    body {
+      background-color: #070B14;
+      color: #E2E8F0;
+      overflow-x: hidden;
+    }
+    
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Polished Animated Buttons */
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      background: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #06B6D4 100%);
+      background-size: 200% auto;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
+    }
+    .btn-glow:hover {
+      background-position: right center;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+    .btn-glow:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-outline {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+    }
+    .btn-outline:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    /* Enterprise Bordered Tables */
+    .bordered-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .bordered-table th {
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 2px solid rgba(71, 85, 105, 0.6);
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: #94A3B8;
+    }
+    .bordered-table td {
+      border-bottom: 1px solid rgba(51, 65, 85, 0.45);
+      padding: 0.85rem 1rem;
+      font-size: 0.875rem;
+      transition: background-color 0.15s ease;
+    }
+    .bordered-table tr:last-child td {
+      border-bottom: none;
+    }
+    .bordered-table tbody tr {
+      background: rgba(15, 23, 42, 0.4);
+      cursor: pointer;
+    }
+    .bordered-table tbody tr:hover {
+      background: rgba(99, 102, 241, 0.12) !important;
+    }
+    .bordered-table tbody tr:nth-child(even) {
+      background: rgba(30, 41, 59, 0.35);
+    }
+
+    /* Rolling Numbers Style */
+    .counter-value {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background: rgba(7, 11, 20, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #252F48;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B4B70;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- 3D Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Main Container -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="glass-panel border-b border-slate-800 sticky top-0 z-40 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-500/30 ring-2 ring-brand-400/30">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+              {{ app_title }}
+            </h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-brand-500/20 text-brand-cyan border border-brand-500/30">
+              v{{ version }}
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Total Quality Management • Q07 Data Accuracy & Poka-Yoke Controls</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center space-x-1 p-1 bg-slate-900/80 rounded-xl border border-slate-800/80">
+        <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="nav-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-white bg-brand-600 shadow-md shadow-brand-600/30">
+          📦 Inventory Catalog
+        </button>
+        <button onclick="switchTab('tqm')" id="tab-btn-tqm" class="nav-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60">
+          📊 TQM & Quality Hub
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="nav-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/60">
+          📜 Audit & Stock Ledger
+        </button>
+      </nav>
+
+      <!-- User Session Actions -->
+      <div class="flex items-center space-x-3">
+        <div id="user-badge" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span id="user-name" class="font-medium text-slate-200">Admin</span>
+          <span id="user-role-chip" class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-500/30 text-brand-100 border border-brand-500/40">ADMIN</span>
+        </div>
+
+        <button onclick="openAuthModal()" id="btn-auth-trigger" class="btn-outline px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-200 hover:text-white flex items-center space-x-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span id="auth-btn-label">Switch / Sign In</span>
+        </button>
+
+        <button onclick="handleLogout()" id="btn-logout" class="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 hover:text-red-100 transition-colors" title="Sign Out">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-header for Mobile Navigation -->
+    <div class="md:hidden glass-panel border-b border-slate-800 px-4 py-2 flex items-center justify-around">
+      <button onclick="switchTab('inventory')" id="tab-btn-inventory-mob" class="text-xs font-semibold text-brand-cyan">📦 Inventory</button>
+      <button onclick="switchTab('tqm')" id="tab-btn-tqm-mob" class="text-xs font-semibold text-slate-400">📊 TQM Hub</button>
+      <button onclick="switchTab('audit')" id="tab-btn-audit-mob" class="text-xs font-semibold text-slate-400">📜 Audit</button>
+    </div>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+      <!-- ================================================================= -->
+      <!-- TOP METRICS CARDS WITH ROLLING NUMBERS                           -->
+      <!-- ================================================================= -->
+      <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Card 1: Total Valuation -->
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+            <span>Total Valuation</span>
+            <span class="text-emerald-400">₹ Active</span>
+          </div>
+          <div class="flex items-baseline space-x-1">
+            <span class="text-lg font-bold text-emerald-400">₹</span>
+            <span id="stat-valuation" class="counter-value text-2xl lg:text-3xl font-extrabold text-white">0</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Weighted inventory asset</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+        </div>
+
+        <!-- Card 2: Total Units -->
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+            <span>Total Units</span>
+            <span class="text-cyan-400">Stock</span>
+          </div>
+          <span id="stat-units" class="counter-value text-2xl lg:text-3xl font-extrabold text-white">0</span>
+          <p class="text-[11px] text-slate-400 mt-1">Physical units tracked</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+        </div>
+
+        <!-- Card 3: Unique SKUs -->
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+            <span>Product SKUs</span>
+            <span class="text-brand-500">Catalog</span>
+          </div>
+          <span id="stat-items" class="counter-value text-2xl lg:text-3xl font-extrabold text-white">0</span>
+          <p class="text-[11px] text-slate-400 mt-1">Unique registered products</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 to-indigo-600"></div>
+        </div>
+
+        <!-- Card 4: Low Stock Alerts -->
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+            <span>Low Stock</span>
+            <span id="stat-low-stock-badge" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">ALERT</span>
+          </div>
+          <span id="stat-low-stock" class="counter-value text-2xl lg:text-3xl font-extrabold text-amber-400">0</span>
+          <p class="text-[11px] text-slate-400 mt-1">Below reorder threshold</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
+        </div>
+
+        <!-- Card 5: Quality CTQ Score -->
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+            <span>Quality Index</span>
+            <span class="text-emerald-400 font-semibold">TQM CTQ</span>
+          </div>
+          <div class="flex items-baseline space-x-0.5">
+            <span id="stat-quality" class="counter-value text-2xl lg:text-3xl font-extrabold text-emerald-400">100.0</span>
+            <span class="text-sm font-bold text-emerald-400">%</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Poka-Yoke error prevention</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: INVENTORY CATALOG                                         -->
+      <!-- ================================================================= -->
+      <section id="tab-inventory" class="space-y-4">
+        <!-- Action Toolbar -->
+        <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2.5 flex-1">
+            <!-- Search Bar -->
+            <div class="relative flex-1 min-w-[200px] max-w-md">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" id="filter-search" oninput="debounceFilter()" placeholder="Search by name, SKU, ID, supplier..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-white placeholder-slate-500">
+            </div>
+
+            <!-- Category Filter -->
+            <select id="filter-category" onchange="loadProducts()" class="bg-slate-900/90 border border-slate-700/80 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-500 text-slate-200">
+              <option value="">All Categories</option>
+              {% for cat in allowed_categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+
+            <!-- Low Stock Toggle -->
+            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/60 px-3 py-2 rounded-lg border border-slate-800">
+              <input type="checkbox" id="filter-low-stock" onchange="loadProducts()" class="rounded border-slate-700 text-brand-600 focus:ring-brand-500">
+              <span>Low Stock Alerts Only</span>
+            </label>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center space-x-2">
+            <button onclick="loadProducts()" class="btn-outline px-3 py-2 rounded-lg text-xs font-semibold text-slate-300 flex items-center space-x-1" title="Refresh">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Refresh</span>
+            </button>
+            <button onclick="openAddProductModal()" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>New Product</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bordered Product Table -->
+        <div class="glass-panel rounded-xl overflow-hidden shadow-2xl">
+          <div class="overflow-x-auto">
+            <table class="bordered-table" id="products-table">
+              <thead>
+                <tr>
+                  <th class="w-24">Item ID</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>SKU Code</th>
+                  <th class="text-right">Stock Qty</th>
+                  <th class="text-right">Unit Price</th>
+                  <th class="text-right">Valuation</th>
+                  <th>Supplier</th>
+                  <th>Status</th>
+                  <th class="text-center w-36">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody">
+                <tr>
+                  <td colspan="10" class="text-center py-12 text-slate-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                      <svg class="w-8 h-8 text-slate-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      </svg>
+                      <span>Loading inventory catalog...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: TQM QUALITY & CONTINUOUS IMPROVEMENT HUB                  -->
+      <!-- ================================================================= -->
+      <section id="tab-tqm" class="space-y-6 hidden">
+        <!-- CTQ Scorecards Banner -->
+        <div class="glass-panel p-6 rounded-xl space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                <span>Critical-to-Quality (CTQ) Performance Scorecard</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Q07 Audited</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Real-time operational verification against statistical quality standards and Poka-Yoke mistake proofing.</p>
+            </div>
+            <button onclick="loadTQMData()" class="btn-outline px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300">Recompute CTQ</button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3" id="ctq-indicators-container">
+            <!-- Dynamically populated CTQ cards -->
+          </div>
+        </div>
+
+        <!-- Pareto Analysis & Defect Checksheet Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Pareto Chart (80/20 Rule) -->
+          <div class="lg:col-span-7 glass-panel p-5 rounded-xl space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-slate-100 text-sm">Pareto Analysis (80/20 Vital Few vs. Useful Many)</h3>
+                <p class="text-xs text-slate-400">Prioritizing quality improvement efforts on highest impact failure modes</p>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">TQM Tool 1</span>
+            </div>
+
+            <!-- Custom SVG/Canvas Pareto Visual -->
+            <div id="pareto-chart-container" class="h-64 flex flex-col justify-end p-2 bg-slate-950/60 rounded-xl border border-slate-800/80 relative">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div id="pareto-vital-few" class="text-xs p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
+              <!-- Vital few summary -->
+            </div>
+          </div>
+
+          <!-- Defect Checksheet & Quick Logger -->
+          <div class="lg:col-span-5 glass-panel p-5 rounded-xl space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-100 text-sm">Defect Checksheet & Prevention</h3>
+              <button onclick="openLogDefectModal()" class="btn-glow px-2.5 py-1 rounded text-xs font-semibold text-white">+ Log Defect</button>
+            </div>
+
+            <div class="max-h-72 overflow-y-auto space-y-2 pr-1" id="defect-checksheet-list">
+              <!-- Defect checksheets -->
+            </div>
+          </div>
+        </div>
+
+        <!-- FMEA (Failure Mode and Effects Analysis) Section -->
+        <div class="glass-panel p-5 rounded-xl space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="font-bold text-slate-100 text-sm flex items-center space-x-2">
+                <span>FMEA Matrix (Failure Mode & Effects Analysis)</span>
+                <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-300">RPN Ranked</span>
+              </h3>
+              <p class="text-xs text-slate-400">Risk Priority Number (RPN = Severity × Occurrence × Detection) with proactive Poka-Yoke controls</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="bordered-table text-xs" id="fmea-table">
+              <thead>
+                <tr>
+                  <th>Process Step</th>
+                  <th>Potential Failure Mode</th>
+                  <th>Failure Effect</th>
+                  <th>Root Cause</th>
+                  <th>Poka-Yoke Controls</th>
+                  <th class="text-center">S</th>
+                  <th class="text-center">O</th>
+                  <th class="text-center">D</th>
+                  <th class="text-center font-bold text-amber-400">RPN</th>
+                  <th>Corrective Action</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="fmea-tbody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PDCA Continuous Improvement Cycle -->
+        <div class="glass-panel p-5 rounded-xl space-y-3">
+          <div class="border-b border-slate-800 pb-2">
+            <h3 class="font-bold text-slate-100 text-sm">Deming PDCA Continuous Improvement Cycles</h3>
+            <p class="text-xs text-slate-400">Systematic Plan-Do-Check-Act quality loop preventing recurrence</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="pdca-board">
+            <!-- PDCA Cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: AUDIT & STOCK LEDGER                                      -->
+      <!-- ================================================================= -->
+      <section id="tab-audit" class="space-y-4 hidden">
+        <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center space-x-3 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <input type="text" id="filter-audit-search" oninput="debounceAuditFilter()" placeholder="Search audit trail by entity, reason, or changes..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-brand-500 text-white">
+            </div>
+            <select id="filter-audit-action" onchange="loadAuditLogs()" class="bg-slate-900/90 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200">
+              <option value="All">All Actions</option>
+              <option value="CREATE">CREATE</option>
+              <option value="UPDATE">UPDATE</option>
+              <option value="STOCK_ADJUSTMENT">STOCK ADJUSTMENT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+          </div>
+          <button onclick="loadAuditLogs()" class="btn-outline px-3 py-2 rounded-lg text-xs font-semibold text-slate-300">Refresh Ledger</button>
+        </div>
+
+        <!-- Audit Table -->
+        <div class="glass-panel rounded-xl overflow-hidden shadow-2xl">
+          <div class="overflow-x-auto">
+            <table class="bordered-table" id="audit-table">
+              <thead>
+                <tr>
+                  <th class="w-16">Log ID</th>
+                  <th>Timestamp</th>
+                  <th>Action</th>
+                  <th>Entity Target</th>
+                  <th>Audited Reason</th>
+                  <th>Field Changes (Before → After)</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto glass-panel border-t border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500">
+      <div class="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto gap-2">
+        <span>{{ app_title }} • Total Quality Management & Continuous Improvement System</span>
+        <span>ACID SQLite Storage • ISO 9001 / TQM Certified Framework</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODALS CONTAINER                                                      -->
+  <!-- ===================================================================== -->
+
+  <!-- 1. PRODUCT DETAILS DEEP-LINK MODAL -->
+  <div id="modal-product-details" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-2xl border border-slate-700 shadow-2xl overflow-hidden animate-float">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div class="flex items-center space-x-3">
+          <span id="detail-product-id" class="px-2.5 py-1 rounded-md bg-brand-500/20 text-brand-cyan font-mono text-xs font-bold border border-brand-500/30">PRD-XXXX</span>
+          <h3 id="detail-product-name" class="text-base font-bold text-white truncate max-w-xs sm:max-w-md">Product Details</h3>
+        </div>
+        <button onclick="closeModal('modal-product-details')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        <!-- Top Stats Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">SKU Code</span>
+            <div id="detail-sku" class="text-sm font-mono font-bold text-brand-cyan truncate">SKU-000</div>
+          </div>
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Category</span>
+            <div id="detail-category" class="text-sm font-semibold text-slate-200">Category</div>
+          </div>
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Unit Price</span>
+            <div id="detail-price" class="text-sm font-bold text-emerald-400">₹0.00</div>
+          </div>
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Stock Valuation</span>
+            <div id="detail-valuation" class="text-sm font-bold text-emerald-400">₹0.00</div>
+          </div>
+        </div>
+
+        <!-- Stock Health Indicator -->
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-300 font-medium">Current Stock Level</span>
+            <span id="detail-stock-badge" class="px-2 py-0.5 rounded font-bold text-[11px] bg-emerald-500/20 text-emerald-300">In Stock</span>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="detail-quantity" class="text-3xl font-extrabold text-white">0</span>
+            <span class="text-xs text-slate-400">units in warehouse</span>
+          </div>
+          <!-- Progress bar -->
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="detail-stock-progress" class="bg-gradient-to-r from-brand-cyan to-brand-500 h-2 rounded-full" style="width: 50%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400 pt-1">
+            <span>Safety Reorder Trigger: <strong id="detail-reorder" class="text-slate-200">5 units</strong></span>
+            <span>Supplier: <strong id="detail-supplier" class="text-slate-200">Vendor</strong></span>
+          </div>
+        </div>
+
+        <!-- Timestamps -->
+        <div class="flex justify-between text-xs text-slate-500 px-1 border-t border-slate-800/80 pt-3">
+          <span>Created: <span id="detail-created-at" class="text-slate-400 font-mono">-</span></span>
+          <span>Last Updated: <span id="detail-updated-at" class="text-slate-400 font-mono">-</span></span>
+        </div>
+
+        <!-- Recent Stock Movements for this product -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Recent Stock Ledger Entries</h4>
+          <div class="max-h-36 overflow-y-auto space-y-1.5" id="detail-movements-list">
+            <!-- Movements populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer with Action Buttons -->
+      <div class="px-6 py-4 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between">
+        <button onclick="handleDeleteProductFromModal()" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-200 hover:bg-rose-950/40 border border-rose-900/50 transition-colors">
+          Delete Product
+        </button>
+        <div class="flex items-center space-x-2.5">
+          <button onclick="openAdjustStockModalFromDetail()" class="btn-outline px-4 py-2 rounded-lg text-xs font-semibold text-brand-cyan border-brand-500/40 hover:bg-brand-500/10">
+            ⚡ Adjust Stock
+          </button>
+          <button onclick="openEditProductModalFromDetail()" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white">
+            ✏️ Edit Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. EDIT PRODUCT MODAL -->
+  <div id="modal-edit-product" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>Edit Product Master</span>
+          <span id="edit-product-id-badge" class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/20 text-brand-cyan">PRD-XXXX</span>
+        </h3>
+        <button onclick="closeModal('modal-edit-product')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-edit-product" onsubmit="handleSaveProductEdit(event)" class="p-6 space-y-4">
+        <input type="hidden" id="edit-product-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Product Name *</label>
+          <input type="text" id="edit-name" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Category *</label>
+            <select id="edit-category" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+              {% for cat in allowed_categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">SKU Code *</label>
+            <input type="text" id="edit-sku" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono uppercase focus:border-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Unit Price (₹) *</label>
+            <input type="number" step="0.01" min="0.01" id="edit-price" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Reorder Level *</label>
+            <input type="number" min="0" id="edit-reorder" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Supplier Name *</label>
+          <input type="text" id="edit-supplier" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Audit Change Reason *</label>
+          <input type="text" id="edit-reason" value="Catalog specification update" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div id="edit-error-msg" class="text-xs text-rose-400 hidden"></div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-edit-product')" class="btn-outline px-4 py-2 rounded-lg text-xs font-medium text-slate-300">Cancel</button>
+          <button type="submit" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ADD PRODUCT MODAL -->
+  <div id="modal-add-product" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>Register New Inventory Product</span>
+          <span id="add-next-id-badge" class="px-2 py-0.5 rounded text-xs font-mono bg-brand-500/20 text-brand-cyan">PRD-XXXX</span>
+        </h3>
+        <button onclick="closeModal('modal-add-product')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-add-product" onsubmit="handleCreateProduct(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Product Name *</label>
+          <input type="text" id="add-name" required placeholder="e.g. Ergonomic Office Chair" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Category *</label>
+            <select id="add-category" onchange="autoSuggestSKU()" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+              {% for cat in allowed_categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">SKU Code *</label>
+            <input type="text" id="add-sku" required placeholder="ELE-8921" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono uppercase focus:border-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Initial Qty *</label>
+            <input type="number" min="0" id="add-quantity" value="10" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Price (₹) *</label>
+            <input type="number" step="0.01" min="0.01" id="add-price" placeholder="499.00" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Reorder Level *</label>
+            <input type="number" min="0" id="add-reorder" value="5" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Supplier Name *</label>
+          <input type="text" id="add-supplier" required placeholder="e.g. Acme Global Logistics" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div id="add-error-msg" class="text-xs text-rose-400 hidden"></div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-add-product')" class="btn-outline px-4 py-2 rounded-lg text-xs font-medium text-slate-300">Cancel</button>
+          <button type="submit" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white">Create Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. ADJUST STOCK MODAL -->
+  <div id="modal-adjust-stock" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div>
+          <h3 class="text-base font-bold text-white">Stock Adjustment & Audit</h3>
+          <span id="adjust-prod-label" class="text-xs text-brand-cyan font-mono">PRD-XXXX</span>
+        </div>
+        <button onclick="closeModal('modal-adjust-stock')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-adjust-stock" onsubmit="handleSaveStockAdjustment(event)" class="p-6 space-y-4">
+        <input type="hidden" id="adjust-product-id">
+
+        <!-- Stock Preview Cards -->
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold">Current Stock</span>
+            <div id="adjust-current-stock" class="text-2xl font-extrabold text-white">0</div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold">Adjusted Stock</span>
+            <div id="adjust-target-stock" class="text-2xl font-extrabold text-brand-cyan">0</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">New Total Quantity *</label>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="modifyAdjustQty(-5)" class="btn-outline px-3 py-2 rounded-lg text-xs font-bold text-rose-400">-5</button>
+            <button type="button" onclick="modifyAdjustQty(-1)" class="btn-outline px-3 py-2 rounded-lg text-xs font-bold text-rose-400">-1</button>
+            <input type="number" min="0" id="adjust-new-quantity" oninput="updateAdjustPreview()" required class="flex-1 bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-center text-sm font-bold text-white focus:border-brand-500 focus:outline-none">
+            <button type="button" onclick="modifyAdjustQty(1)" class="btn-outline px-3 py-2 rounded-lg text-xs font-bold text-emerald-400">+1</button>
+            <button type="button" onclick="modifyAdjustQty(5)" class="btn-outline px-3 py-2 rounded-lg text-xs font-bold text-emerald-400">+5</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Standard Reason *</label>
+          <select id="adjust-reason" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+            {% for r in adjustment_reasons %}
+            <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div id="adjust-error-msg" class="text-xs text-rose-400 hidden"></div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-adjust-stock')" class="btn-outline px-4 py-2 rounded-lg text-xs font-medium text-slate-300">Cancel</button>
+          <button type="submit" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white">Confirm Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. AUTH MODAL (LOGIN & SIGN UP + DEMO AUTOFILL) -->
+  <div id="modal-auth" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+      <!-- Header / Tabs -->
+      <div class="p-6 pb-2 border-b border-slate-800">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+            <span>Authentication & Access Control</span>
+          </h3>
+          <button onclick="closeModal('modal-auth')" class="text-slate-400 hover:text-white p-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <div class="flex space-x-2 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+          <button onclick="switchAuthTab('signin')" id="btn-auth-signin" class="flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow-md">
+            Sign In
+          </button>
+          <button onclick="switchAuthTab('signup')" id="btn-auth-signup" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white">
+            Create New Account
+          </button>
+        </div>
+      </div>
+
+      <!-- Demo Accounts Strip with USE Button -->
+      <div class="p-4 bg-slate-950/80 border-b border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          <span>⚡ 1-Click Demo Profiles</span>
+          <span class="text-brand-cyan">Instant Autofill</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2" id="demo-users-container">
+          <!-- Populated by JS with 1-click 'USE' buttons -->
+        </div>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Username *</label>
+          <input type="text" id="login-username" required placeholder="admin" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password *</label>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div id="login-error-msg" class="text-xs text-rose-400 hidden"></div>
+
+        <div class="pt-2">
+          <button type="submit" id="login-submit-btn" class="w-full btn-glow py-2.5 rounded-lg text-xs font-bold text-white shadow-lg">
+            Sign In to Cockpit
+          </button>
+        </div>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="p-6 space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name *</label>
+          <input type="text" id="reg-fullname" required placeholder="e.g. Sarah Connor" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Username *</label>
+            <input type="text" id="reg-username" required placeholder="sconnor" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Role *</label>
+            <select id="reg-role" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+              <option value="Staff">Staff</option>
+              <option value="Manager">Manager</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+          <input type="email" id="reg-email" placeholder="user@company.com" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password (min 6 chars) *</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div id="reg-error-msg" class="text-xs text-rose-400 hidden"></div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full btn-glow py-2.5 rounded-lg text-xs font-bold text-white shadow-lg">
+            Create Account & Save to Database
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. LOG DEFECT MODAL -->
+  <div id="modal-log-defect" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <h3 class="text-base font-bold text-white">Log Quality Defect (TQM Checksheet)</h3>
+        <button onclick="closeModal('modal-log-defect')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-log-defect" onsubmit="handleLogDefectSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Defect Category *</label>
+          <select id="defect-cat" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+            <option value="Invalid Input">Invalid Input</option>
+            <option value="Duplicate SKU">Duplicate SKU</option>
+            <option value="Negative Quantity">Negative Quantity</option>
+            <option value="Missing Mandatory Field">Missing Mandatory Field</option>
+            <option value="Data Inconsistency">Data Inconsistency</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Description *</label>
+          <textarea id="defect-desc" required rows="2" placeholder="Describe the detected quality non-conformance..." class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Severity *</label>
+            <select id="defect-sev" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Occurrences</label>
+            <input type="number" min="1" id="defect-count" value="1" required class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Corrective Action (Poka-Yoke)</label>
+          <input type="text" id="defect-action" placeholder="Preventive control applied" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-brand-500 focus:outline-none">
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modal-log-defect')" class="btn-outline px-4 py-2 rounded-lg text-xs font-medium text-slate-300">Cancel</button>
+          <button type="submit" class="btn-glow px-4 py-2 rounded-lg text-xs font-bold text-white">Save Defect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none px-4 py-3 rounded-xl border glass-panel shadow-2xl flex items-center space-x-3 text-xs font-semibold">
+    <div id="toast-icon"></div>
+    <span id="toast-message" class="text-slate-100">Notification message</span>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT LOGIC & 3D ANIMATION ENGINE                                -->
+  <!-- ===================================================================== -->
+  <script>
+    // Global State
+    let productsList = [];
+    let currentUser = null;
+    let currentSelectedProduct = null;
+    let filterDebounceTimer = null;
+    let auditDebounceTimer = null;
+
+    // -----------------------------------------------------------------------
+    // 1. PROCEDURAL 3D CANVAS BACKGROUND (Glowing Particle Plexus)
+    // -----------------------------------------------------------------------
+    (function init3DBackground() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const particleCount = 70;
+      let mouse = { x: -1000, y: -1000, radius: 150 };
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      // Particle class
+      class Particle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.vx = (Math.random() - 0.5) * 0.7;
+          this.vy = (Math.random() - 0.5) * 0.7;
+          this.radius = Math.random() * 2 + 1.2;
+          this.color = Math.random() > 0.4 ? 'rgba(99, 102, 241, ' : 'rgba(6, 182, 212, ';
+          this.alpha = Math.random() * 0.6 + 0.3;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < 0 || this.x > width) this.vx *= -1;
+          if (this.y < 0 || this.y > height) this.vy *= -1;
+
+          // Mouse push
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.radius) {
+            const angle = Math.atan2(dy, dx);
+            this.x -= Math.cos(angle) * 1.5;
+            this.y -= Math.sin(angle) * 1.5;
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color + this.alpha + ')';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#6366F1';
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 140) {
+              const alpha = (1 - dist / 140) * 0.22;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // -----------------------------------------------------------------------
+    // 2. ROLLING NUMBERS ENGINE (Smooth Easing CountUp)
+    // -----------------------------------------------------------------------
+    function animateCounter(elementId, targetValue, duration = 1200, isCurrency = false, decimals = 0) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const startValue = parseFloat(el.getAttribute('data-value') || '0');
+      el.setAttribute('data-value', targetValue);
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease Out Cubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const current = startValue + (targetValue - startValue) * ease;
+
+        if (isCurrency) {
+          el.textContent = Math.round(current).toLocaleString('en-IN');
+        } else if (decimals > 0) {
+          el.textContent = current.toFixed(decimals);
+        } else {
+          el.textContent = Math.round(current).toLocaleString();
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          if (isCurrency) {
+            el.textContent = Math.round(targetValue).toLocaleString('en-IN');
+          } else if (decimals > 0) {
+            el.textContent = targetValue.toFixed(decimals);
+          } else {
+            el.textContent = Math.round(targetValue).toLocaleString();
+          }
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // -----------------------------------------------------------------------
+    // 3. TOAST NOTIFICATIONS
+    // -----------------------------------------------------------------------
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const msg = document.getElementById('toast-message');
+
+      msg.textContent = message;
+      if (type === 'success') {
+        toast.className = 'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl border border-emerald-500/40 bg-slate-900/90 text-emerald-300 shadow-2xl flex items-center space-x-3 text-xs font-semibold transform translate-y-0 opacity-100 transition-all duration-300';
+        icon.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>';
+      } else {
+        toast.className = 'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl border border-rose-500/40 bg-slate-900/90 text-rose-300 shadow-2xl flex items-center space-x-3 text-xs font-semibold transform translate-y-0 opacity-100 transition-all duration-300';
+        icon.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>';
+      }
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. TAB NAVIGATION
+    // -----------------------------------------------------------------------
+    function switchTab(tabName) {
+      ['inventory', 'tqm', 'audit'].forEach(name => {
+        const section = document.getElementById(`tab-${name}`);
+        const btn = document.getElementById(`tab-btn-${name}`);
+        const btnMob = document.getElementById(`tab-btn-${name}-mob`);
+        if (name === tabName) {
+          section?.classList.remove('hidden');
+          btn?.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30');
+          btn?.classList.remove('text-slate-400');
+          btnMob?.classList.add('text-brand-cyan');
+          btnMob?.classList.remove('text-slate-400');
+        } else {
+          section?.classList.add('hidden');
+          btn?.classList.remove('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30');
+          btn?.classList.add('text-slate-400');
+          btnMob?.classList.remove('text-brand-cyan');
+          btnMob?.classList.add('text-slate-400');
+        }
+      });
+
+      if (tabName === 'inventory') loadProducts();
+      if (tabName === 'tqm') loadTQMData();
+      if (tabName === 'audit') loadAuditLogs();
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. MODAL HELPERS
+    // -----------------------------------------------------------------------
+    function openModal(id) {
+      document.getElementById(id)?.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+      if (id === 'modal-product-details' && window.location.hash.startsWith('#product/')) {
+        history.replaceState(null, null, ' ');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. INVENTORY DATA LOADING & RENDERING
+    // -----------------------------------------------------------------------
+    async function loadProducts() {
+      const search = document.getElementById('filter-search')?.value || '';
+      const category = document.getElementById('filter-category')?.value || '';
+      const lowStock = document.getElementById('filter-low-stock')?.checked || false;
+
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (category) params.append('category', category);
+      if (lowStock) params.append('low_stock', 'true');
+
+      try {
+        const res = await fetch(`/api/products?${params.toString()}`);
+        const data = await res.json();
+        if (data.success) {
+          productsList = data.products;
+          renderProductsTable(productsList);
+          loadSummaryStats();
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+
+    function renderProductsTable(products) {
+      const tbody = document.getElementById('products-tbody');
+      if (!tbody) return;
+
+      if (products.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="text-center py-12 text-slate-400">
+              <div class="flex flex-col items-center justify-center space-y-2">
+                <span class="text-3xl">📦</span>
+                <span class="font-semibold">No inventory products found</span>
+                <span class="text-xs text-slate-500">Try adjusting your search criteria or register a new product</span>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = products.map((p, index) => {
+        const isLow = p.quantity <= p.reorder_level;
+        const statusBadge = p.quantity === 0
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">OUT OF STOCK</span>'
+          : isLow
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">LOW STOCK (${p.reorder_level})</span>`
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">IN STOCK</span>';
+
+        const categoryTag = `<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-300 border border-slate-700">${p.category}</span>`;
+
+        return `
+          <tr onclick="openProductDetails('${p.product_id}')" class="group">
+            <td class="font-mono text-xs font-bold text-brand-cyan">${p.product_id}</td>
+            <td class="font-semibold text-slate-100 group-hover:text-brand-cyan transition-colors">
+              ${escapeHtml(p.name)}
+            </td>
+            <td>${categoryTag}</td>
+            <td class="font-mono text-xs text-slate-300">${p.sku}</td>
+            <td class="text-right font-bold ${isLow ? 'text-amber-400 font-extrabold' : 'text-slate-100'}">
+              ${p.quantity.toLocaleString()}
+            </td>
+            <td class="text-right font-mono text-emerald-400">₹${p.unit_price.toFixed(2)}</td>
+            <td class="text-right font-mono font-bold text-emerald-400">₹${(p.quantity * p.unit_price).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            <td class="text-slate-300 text-xs truncate max-w-[140px]">${escapeHtml(p.supplier_name)}</td>
+            <td>${statusBadge}</td>
+            <td class="text-center" onclick="event.stopPropagation()">
+              <div class="flex items-center justify-center space-x-1.5">
+                <button onclick="openProductDetails('${p.product_id}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700" title="Inspect Deep-link">
+                  👁️
+                </button>
+                <button onclick="openAdjustStockModal('${p.product_id}', ${p.quantity})" class="p-1.5 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 text-brand-cyan border border-brand-500/30" title="Adjust Stock">
+                  ⚡
+                </button>
+                <button onclick="openEditProductModal('${p.product_id}')" class="p-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30" title="Edit Master">
+                  ✏️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function debounceFilter() {
+      clearTimeout(filterDebounceTimer);
+      filterDebounceTimer = setTimeout(loadProducts, 300);
+    }
+
+    async function loadSummaryStats() {
+      try {
+        const res = await fetch('/api/inventory/summary');
+        const data = await res.json();
+        if (data.success) {
+          animateCounter('stat-valuation', data.total_valuation, 1200, true);
+          animateCounter('stat-units', data.total_units, 1000);
+          animateCounter('stat-items', data.total_items, 800);
+          animateCounter('stat-low-stock', data.low_stock_count, 800);
+        }
+      } catch (e) {
+        console.error('Error fetching inventory summary:', e);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 7. PRODUCT DETAILS DEEP-LINK MODAL
+    // -----------------------------------------------------------------------
+    async function openProductDetails(productId) {
+      try {
+        const res = await fetch(`/api/products/${productId}`);
+        const data = await res.json();
+        if (!data.success) {
+          showToast(data.message || 'Product not found', 'error');
+          return;
+        }
+
+        const p = data.product;
+        currentSelectedProduct = p;
+
+        // Update URL hash for deep-linking
+        window.location.hash = `product/${p.product_id}`;
+
+        // Populate fields
+        document.getElementById('detail-product-id').textContent = p.product_id;
+        document.getElementById('detail-product-name').textContent = p.name;
+        document.getElementById('detail-sku').textContent = p.sku;
+        document.getElementById('detail-category').textContent = p.category;
+        document.getElementById('detail-price').textContent = `₹${p.unit_price.toFixed(2)}`;
+        document.getElementById('detail-valuation').textContent = `₹${(p.quantity * p.unit_price).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById('detail-quantity').textContent = p.quantity.toLocaleString();
+        document.getElementById('detail-reorder').textContent = `${p.reorder_level} units`;
+        document.getElementById('detail-supplier').textContent = p.supplier_name;
+        document.getElementById('detail-created-at').textContent = p.created_at || '-';
+        document.getElementById('detail-updated-at').textContent = p.updated_at || '-';
+
+        // Stock status & progress bar
+        const badge = document.getElementById('detail-stock-badge');
+        const progress = document.getElementById('detail-stock-progress');
+        if (p.quantity === 0) {
+          badge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-rose-500/20 text-rose-300';
+          badge.textContent = 'Out of Stock';
+          progress.style.width = '0%';
+          progress.className = 'bg-rose-500 h-2 rounded-full';
+        } else if (p.quantity <= p.reorder_level) {
+          badge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-amber-500/20 text-amber-300';
+          badge.textContent = 'Low Stock Alert';
+          progress.style.width = '25%';
+          progress.className = 'bg-amber-500 h-2 rounded-full';
+        } else {
+          badge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-emerald-500/20 text-emerald-300';
+          badge.textContent = 'Optimal In Stock';
+          const pct = Math.min(Math.round((p.quantity / (p.reorder_level * 3)) * 100), 100);
+          progress.style.width = `${pct}%`;
+          progress.className = 'bg-gradient-to-r from-brand-cyan to-brand-500 h-2 rounded-full';
+        }
+
+        // Render Movement Ledger in Details Modal
+        const movementsList = document.getElementById('detail-movements-list');
+        if (data.movements && data.movements.length > 0) {
+          movementsList.innerHTML = data.movements.map(m => {
+            const isPos = m.quantity_change > 0;
+            return `
+              <div class="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold ${isPos ? 'text-emerald-400' : 'text-rose-400'}">${isPos ? '+' : ''}${m.quantity_change}</span>
+                  <span class="text-slate-300 font-medium truncate max-w-[200px]">${escapeHtml(m.reason)}</span>
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono">${m.timestamp.slice(0, 16)}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          movementsList.innerHTML = '<div class="text-xs text-slate-500 p-2 text-center">No recent stock movements recorded.</div>';
+        }
+
+        openModal('modal-product-details');
+      } catch (e) {
+        console.error('Error fetching product details:', e);
+      }
+    }
+
+    function openEditProductModalFromDetail() {
+      closeModal('modal-product-details');
+      if (currentSelectedProduct) {
+        openEditProductModal(currentSelectedProduct.product_id);
+      }
+    }
+
+    function openAdjustStockModalFromDetail() {
+      closeModal('modal-product-details');
+      if (currentSelectedProduct) {
+        openAdjustStockModal(currentSelectedProduct.product_id, currentSelectedProduct.quantity);
+      }
+    }
+
+    async function handleDeleteProductFromModal() {
+      if (!currentSelectedProduct) return;
+      if (!confirm(`Are you sure you want to delete '${currentSelectedProduct.name}' (${currentSelectedProduct.product_id})? This will create an audit entry.`)) {
+        return;
+      }
+      try {
+        const res = await fetch(`/api/products/${currentSelectedProduct.product_id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Decommissioned by user from Web Portal' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-product-details');
+          loadProducts();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (e) {
+        showToast('Failed to delete product', 'error');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 8. EDIT PRODUCT MASTER
+    // -----------------------------------------------------------------------
+    async function openEditProductModal(productId) {
+      let prod = productsList.find(p => p.product_id === productId);
+      if (!prod) {
+        try {
+          const res = await fetch(`/api/products/${productId}`);
+          const d = await res.json();
+          if (d.success) prod = d.product;
+        } catch (e) {}
+      }
+      if (!prod) return;
+
+      document.getElementById('edit-product-id').value = prod.product_id;
+      document.getElementById('edit-product-id-badge').textContent = prod.product_id;
+      document.getElementById('edit-name').value = prod.name;
+      document.getElementById('edit-category').value = prod.category;
+      document.getElementById('edit-sku').value = prod.sku;
+      document.getElementById('edit-price').value = prod.unit_price;
+      document.getElementById('edit-reorder').value = prod.reorder_level;
+      document.getElementById('edit-supplier').value = prod.supplier_name;
+      document.getElementById('edit-reason').value = 'Catalog update via Web Portal';
+      document.getElementById('edit-error-msg').classList.add('hidden');
+
+      openModal('modal-edit-product');
+    }
+
+    async function handleSaveProductEdit(e) {
+      e.preventDefault();
+      const productId = document.getElementById('edit-product-id').value;
+      const errorEl = document.getElementById('edit-error-msg');
+      errorEl.classList.add('hidden');
+
+      const payload = {
+        name: document.getElementById('edit-name').value.trim(),
+        category: document.getElementById('edit-category').value,
+        sku: document.getElementById('edit-sku').value.trim().toUpperCase(),
+        unit_price: parseFloat(document.getElementById('edit-price').value),
+        reorder_level: parseInt(document.getElementById('edit-reorder').value),
+        supplier_name: document.getElementById('edit-supplier').value.trim(),
+        change_reason: document.getElementById('edit-reason').value.trim(),
+      };
+
+      try {
+        const res = await fetch(`/api/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Product ${productId} updated successfully!`, 'success');
+          closeModal('modal-edit-product');
+          loadProducts();
+        } else {
+          errorEl.textContent = data.message || 'Failed to update product';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorEl.textContent = 'Server connection error';
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 9. NEW PRODUCT CREATION
+    // -----------------------------------------------------------------------
+    async function openAddProductModal() {
+      try {
+        const res = await fetch('/api/products/next-id');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('add-next-id-badge').textContent = data.next_id;
+        }
+      } catch (e) {}
+
+      document.getElementById('form-add-product').reset();
+      autoSuggestSKU();
+      document.getElementById('add-error-msg').classList.add('hidden');
+      openModal('modal-add-product');
+    }
+
+    function autoSuggestSKU() {
+      const cat = document.getElementById('add-category')?.value || 'GEN';
+      const prefix = cat.substring(0, 3).toUpperCase();
+      const rnd = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('add-sku').value = `${prefix}-${rnd}`;
+    }
+
+    async function handleCreateProduct(e) {
+      e.preventDefault();
+      const errorEl = document.getElementById('add-error-msg');
+      errorEl.classList.add('hidden');
+
+      const payload = {
+        name: document.getElementById('add-name').value.trim(),
+        category: document.getElementById('add-category').value,
+        sku: document.getElementById('add-sku').value.trim().toUpperCase(),
+        quantity: parseInt(document.getElementById('add-quantity').value),
+        unit_price: parseFloat(document.getElementById('add-price').value),
+        reorder_level: parseInt(document.getElementById('add-reorder').value),
+        supplier_name: document.getElementById('add-supplier').value.trim(),
+        change_reason: 'Initial product registration from Web Portal',
+      };
+
+      try {
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Product registered: ${data.product.product_id}`, 'success');
+          closeModal('modal-add-product');
+          loadProducts();
+        } else {
+          errorEl.textContent = data.message || 'Validation error';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorEl.textContent = 'Failed to submit product';
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 10. STOCK ADJUSTMENT & AUDIT
+    // -----------------------------------------------------------------------
+    function openAdjustStockModal(productId, currentQty) {
+      document.getElementById('adjust-product-id').value = productId;
+      document.getElementById('adjust-prod-label').textContent = productId;
+      document.getElementById('adjust-current-stock').textContent = currentQty.toLocaleString();
+      document.getElementById('adjust-new-quantity').value = currentQty;
+      document.getElementById('adjust-target-stock').textContent = currentQty.toLocaleString();
+      document.getElementById('adjust-error-msg').classList.add('hidden');
+      openModal('modal-adjust-stock');
+    }
+
+    function modifyAdjustQty(delta) {
+      const input = document.getElementById('adjust-new-quantity');
+      let val = parseInt(input.value) || 0;
+      val = Math.max(0, val + delta);
+      input.value = val;
+      updateAdjustPreview();
+    }
+
+    function updateAdjustPreview() {
+      const val = parseInt(document.getElementById('adjust-new-quantity').value) || 0;
+      document.getElementById('adjust-target-stock').textContent = val.toLocaleString();
+    }
+
+    async function handleSaveStockAdjustment(e) {
+      e.preventDefault();
+      const productId = document.getElementById('adjust-product-id').value;
+      const newQty = parseInt(document.getElementById('adjust-new-quantity').value);
+      const reason = document.getElementById('adjust-reason').value;
+      const errorEl = document.getElementById('adjust-error-msg');
+      errorEl.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/inventory/adjust', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: productId,
+            new_quantity: newQty,
+            reason: reason,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-adjust-stock');
+          loadProducts();
+        } else {
+          errorEl.textContent = data.message || 'Adjustment error';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorEl.textContent = 'Server communication error';
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 11. AUTHENTICATION & DEMO USERS
+    // -----------------------------------------------------------------------
+    function openAuthModal() {
+      loadDemoUsers();
+      openModal('modal-auth');
+    }
+
+    function switchAuthTab(mode) {
+      const btnIn = document.getElementById('btn-auth-signin');
+      const btnUp = document.getElementById('btn-auth-signup');
+      const formIn = document.getElementById('form-login');
+      const formUp = document.getElementById('form-register');
+
+      if (mode === 'signin') {
+        btnIn.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow-md';
+        btnUp.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white';
+        formIn.classList.remove('hidden');
+        formUp.classList.add('hidden');
+      } else {
+        btnUp.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow-md';
+        btnIn.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white';
+        formUp.classList.remove('hidden');
+        formIn.classList.add('hidden');
+      }
+    }
+
+    async function loadDemoUsers() {
+      try {
+        const res = await fetch('/api/auth/demo-users');
+        const data = await res.json();
+        if (data.success) {
+          const container = document.getElementById('demo-users-container');
+          container.innerHTML = data.users.map(u => `
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-1.5 hover:border-brand-500/50 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-white">${u.role}</span>
+                  <span class="text-[9px] px-1 rounded bg-slate-800 text-brand-cyan font-mono">${u.username}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate mt-0.5">${u.password}</div>
+              </div>
+              <button type="button" onclick="useDemoCredentials('${u.username}', '${u.password}')" class="w-full btn-glow py-1 px-2 rounded text-[11px] font-bold text-white flex items-center justify-center space-x-1">
+                <span>⚡ Use</span>
+              </button>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Failed to load demo accounts:', e);
+      }
+    }
+
+    function useDemoCredentials(username, password) {
+      switchAuthTab('signin');
+      const uField = document.getElementById('login-username');
+      const pField = document.getElementById('login-password');
+      uField.value = username;
+      pField.value = password;
+
+      // Visual pulse highlight
+      [uField, pField].forEach(f => {
+        f.classList.add('ring-2', 'ring-brand-cyan');
+        setTimeout(() => f.classList.remove('ring-2', 'ring-brand-cyan'), 700);
+      });
+
+      // Highlight submit button
+      const submitBtn = document.getElementById('login-submit-btn');
+      submitBtn.classList.add('animate-bounce');
+      setTimeout(() => submitBtn.classList.remove('animate-bounce'), 800);
+      showToast(`Autofilled demo credentials for ${username}!`, 'success');
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value;
+      const err = document.getElementById('login-error-msg');
+      err.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentUser = data.user;
+          updateUserBadge(currentUser);
+          showToast(`Welcome back, ${currentUser.full_name}!`, 'success');
+          closeModal('modal-auth');
+        } else {
+          err.textContent = data.message || 'Invalid username or password';
+          err.classList.remove('hidden');
+        }
+      } catch (err) {
+        err.textContent = 'Server authentication error';
+        err.classList.remove('hidden');
+      }
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const err = document.getElementById('reg-error-msg');
+      err.classList.add('hidden');
+
+      const payload = {
+        full_name: document.getElementById('reg-fullname').value.trim(),
+        username: document.getElementById('reg-username').value.trim(),
+        role: document.getElementById('reg-role').value,
+        email: document.getElementById('reg-email').value.trim(),
+        password: document.getElementById('reg-password').value,
+      };
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentUser = data.user;
+          updateUserBadge(currentUser);
+          showToast(`Account created for ${currentUser.full_name}! Saved to database.`, 'success');
+          closeModal('modal-auth');
+        } else {
+          err.textContent = data.message || 'Registration failed';
+          err.classList.remove('hidden');
+        }
+      } catch (err) {
+        err.textContent = 'Server registration error';
+        err.classList.remove('hidden');
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        currentUser = null;
+        updateUserBadge({ username: 'guest', full_name: 'Guest User', role: 'Staff' });
+        showToast('Signed out of session', 'success');
+        openAuthModal();
+      } catch (e) {}
+    }
+
+    function updateUserBadge(user) {
+      document.getElementById('user-name').textContent = user.full_name || user.username;
+      const roleChip = document.getElementById('user-role-chip');
+      roleChip.textContent = (user.role || 'STAFF').toUpperCase();
+      if (user.role === 'Admin') {
+        roleChip.className = 'px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-500/30 text-brand-cyan border border-brand-500/40';
+      } else if (user.role === 'Manager') {
+        roleChip.className = 'px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/30 text-amber-300 border border-amber-500/40';
+      } else {
+        roleChip.className = 'px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-700/50 text-slate-300 border border-slate-600/40';
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // 12. TQM DATA & PARETO RENDERER
+    // -----------------------------------------------------------------------
+    async function loadTQMData() {
+      try {
+        const res = await fetch('/api/tqm/summary');
+        const data = await res.json();
+        if (data.success) {
+          renderCTQScorecard(data.ctq_metrics);
+          renderParetoChart(data.pareto);
+        }
+        loadDefectsList();
+        loadFMEATable();
+        loadPDCABoard();
+      } catch (e) {
+        console.error('Error fetching TQM data:', e);
+      }
+    }
+
+    function renderCTQScorecard(ctq) {
+      const container = document.getElementById('ctq-indicators-container');
+      if (!container || !ctq || !ctq.indicators) return;
+
+      animateCounter('stat-quality', ctq.overall_compliance_score, 1000, false, 1);
+
+      container.innerHTML = ctq.indicators.map(ind => {
+        const isPass = ind.status === 'PASS';
+        return `
+          <div class="glass-card p-3 rounded-xl border ${isPass ? 'border-emerald-500/30' : 'border-amber-500/40'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-mono text-[10px] font-bold text-slate-400">${ind.ctq_id}</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${isPass ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                ${ind.status}
+              </span>
+            </div>
+            <div class="text-xs font-bold text-white truncate">${escapeHtml(ind.characteristic)}</div>
+            <div class="text-lg font-extrabold ${isPass ? 'text-emerald-400' : 'text-amber-400'} mt-1">
+              ${ind.actual}
+            </div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Target: ${ind.target}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderParetoChart(pareto) {
+      const chartBox = document.getElementById('pareto-chart-container');
+      const vitalFewBox = document.getElementById('pareto-vital-few');
+      if (!chartBox || !pareto || !pareto.categories || pareto.categories.length === 0) {
+        if (chartBox) chartBox.innerHTML = '<div class="text-xs text-slate-500 text-center my-auto">No defect distribution data to chart.</div>';
+        return;
+      }
+
+      const cats = pareto.categories;
+      const counts = pareto.counts;
+      const maxCount = Math.max(...counts, 1);
+      const cumPcts = pareto.cumulative_percentages;
+
+      const barHtml = cats.map((cat, i) => {
+        const heightPct = Math.round((counts[i] / maxCount) * 75);
+        const cumPct = cumPcts[i];
+        return `
+          <div class="flex-1 flex flex-col items-center justify-end h-full group relative">
+            <!-- Tooltip -->
+            <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] font-mono text-white pointer-events-none z-20 whitespace-nowrap">
+              ${cat}: ${counts[i]} (${cumPct}%)
+            </div>
+            <!-- Cumulative Dot & Text -->
+            <div class="text-[10px] font-bold text-brand-cyan mb-1 font-mono">${cumPct}%</div>
+            <!-- Bar -->
+            <div class="w-full max-w-[42px] bg-gradient-to-t from-brand-600 to-brand-cyan rounded-t-md transition-all duration-500 group-hover:from-indigo-400 group-hover:to-cyan-300" style="height: ${heightPct}%"></div>
+            <!-- Category Label -->
+            <div class="text-[10px] text-slate-400 font-medium truncate w-full text-center mt-2" title="${cat}">
+              ${cat.split(' ')[0]}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      chartBox.innerHTML = `
+        <div class="flex items-end justify-between h-48 w-full gap-2 px-2 pb-2">
+          ${barHtml}
+        </div>
+      `;
+
+      if (vitalFewBox) {
+        vitalFewBox.innerHTML = `
+          <strong class="text-brand-cyan">Pareto 80/20 Finding:</strong>
+          The vital few defect categories contributing to ~80% of data errors are:
+          <span class="text-white font-semibold">${pareto.vital_few.join(', ') || 'Under statistical control'}</span>.
+        `;
+      }
+    }
+
+    async function loadDefectsList() {
+      try {
+        const res = await fetch('/api/tqm/defects');
+        const data = await res.json();
+        if (data.success) {
+          const list = document.getElementById('defect-checksheet-list');
+          if (!list) return;
+          list.innerHTML = data.defects.map(d => `
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="font-mono text-xs font-bold text-brand-cyan">${d.defect_code}</span>
+                  <span class="font-semibold text-white">${escapeHtml(d.category)}</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${d.severity === 'Critical' ? 'bg-rose-500/20 text-rose-300' : 'bg-slate-800 text-slate-300'}">${d.severity}</span>
+                </div>
+                <div class="text-slate-400 text-[11px] mt-0.5">${escapeHtml(d.description)}</div>
+                ${d.corrective_action ? `<div class="text-[10px] text-emerald-400 mt-1">Control: ${escapeHtml(d.corrective_action)}</div>` : ''}
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-slate-200">${d.occurrence_count}x</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    function openLogDefectModal() {
+      openModal('modal-log-defect');
+    }
+
+    async function handleLogDefectSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        category: document.getElementById('defect-cat').value,
+        description: document.getElementById('defect-desc').value.trim(),
+        severity: document.getElementById('defect-sev').value,
+        occurrence_count: parseInt(document.getElementById('defect-count').value),
+        corrective_action: document.getElementById('defect-action').value.trim(),
+      };
+      try {
+        const res = await fetch('/api/tqm/defects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Defect logged to TQM Checksheet!', 'success');
+          closeModal('modal-log-defect');
+          loadTQMData();
+        }
+      } catch (err) {
+        showToast('Failed to log defect', 'error');
+      }
+    }
+
+    async function loadFMEATable() {
+      try {
+        const res = await fetch('/api/tqm/fmea');
+        const data = await res.json();
+        if (data.success) {
+          const tbody = document.getElementById('fmea-tbody');
+          if (!tbody) return;
+          tbody.innerHTML = data.items.map(item => `
+            <tr>
+              <td class="font-medium text-slate-200">${escapeHtml(item.process_step)}</td>
+              <td class="font-bold text-brand-cyan">${escapeHtml(item.failure_mode)}</td>
+              <td class="text-slate-400">${escapeHtml(item.failure_effect)}</td>
+              <td class="text-slate-400">${escapeHtml(item.potential_cause)}</td>
+              <td class="text-emerald-400 font-medium">${escapeHtml(item.existing_controls)}</td>
+              <td class="text-center font-bold">${item.severity}</td>
+              <td class="text-center font-bold">${item.occurrence}</td>
+              <td class="text-center font-bold">${item.detection}</td>
+              <td class="text-center font-extrabold text-amber-400 text-sm">${item.rpn}</td>
+              <td class="text-slate-300">${escapeHtml(item.recommended_action)}</td>
+              <td><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">${item.status}</span></td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    async function loadPDCABoard() {
+      try {
+        const res = await fetch('/api/tqm/pdca');
+        const data = await res.json();
+        if (data.success) {
+          const board = document.getElementById('pdca-board');
+          if (!board) return;
+          const stages = { 'PLAN': 'text-cyan-400', 'DO': 'text-brand-500', 'CHECK': 'text-amber-400', 'ACT': 'text-emerald-400' };
+          board.innerHTML = data.items.map(cycle => `
+            <div class="glass-card p-4 rounded-xl space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold ${stages[cycle.stage] || 'text-white'}">STAGE: ${cycle.stage}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">${cycle.status}</span>
+              </div>
+              <h4 class="font-bold text-white text-xs">${escapeHtml(cycle.title)}</h4>
+              <p class="text-[11px] text-slate-400">${escapeHtml(cycle.problem_statement)}</p>
+              <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-500 flex justify-between">
+                <span>Owner: ${escapeHtml(cycle.owner)}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    // -----------------------------------------------------------------------
+    // 13. AUDIT TRAIL & LOGS
+    // -----------------------------------------------------------------------
+    async function loadAuditLogs() {
+      const search = document.getElementById('filter-audit-search')?.value || '';
+      const action = document.getElementById('filter-audit-action')?.value || 'All';
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (action) params.append('action', action);
+
+      try {
+        const res = await fetch(`/api/audit/logs?${params.toString()}`);
+        const data = await res.json();
+        if (data.success) {
+          renderAuditTable(data.logs);
+        }
+      } catch (e) {
+        console.error('Failed to load audit logs:', e);
+      }
+    }
+
+    function renderAuditTable(logs) {
+      const tbody = document.getElementById('audit-tbody');
+      if (!tbody) return;
+
+      if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-xs">No audit logs matching query.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => {
+        let actionBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">${l.action}</span>`;
+        if (l.action === 'CREATE') actionBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">CREATE</span>';
+        if (l.action === 'UPDATE') actionBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">UPDATE</span>';
+        if (l.action === 'STOCK_ADJUSTMENT') actionBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">STOCK ADJ</span>';
+        if (l.action === 'DELETE') actionBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">DELETE</span>';
+
+        return `
+          <tr>
+            <td class="font-mono text-xs text-slate-400">#${l.id}</td>
+            <td class="font-mono text-xs text-slate-300">${l.timestamp}</td>
+            <td>${actionBadge}</td>
+            <td class="font-mono text-xs font-bold text-brand-cyan">${escapeHtml(l.entity_id)}</td>
+            <td class="text-slate-200 text-xs">${escapeHtml(l.reason || '-')}</td>
+            <td class="text-xs text-slate-400 font-mono">
+              ${l.new_values ? `<span class="text-emerald-400 text-[11px]">${escapeHtml(JSON.stringify(l.new_values))}</span>` : '-'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function debounceAuditFilter() {
+      clearTimeout(auditDebounceTimer);
+      auditDebounceTimer = setTimeout(loadAuditLogs, 300);
+    }
+
+    // -----------------------------------------------------------------------
+    // 14. DEEP-LINK HASH LISTENER & INITIALIZATION
+    // -----------------------------------------------------------------------
+    function checkHashDeepLink() {
+      const hash = window.location.hash;
+      if (hash.startsWith('#product/')) {
+        const prodId = hash.replace('#product/', '').trim();
+        if (prodId) {
+          openProductDetails(prodId);
+        }
+      }
+    }
+    window.addEventListener('hashchange', checkHashDeepLink);
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // App Startup
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Fetch current user
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.success && data.user) {
+          currentUser = data.user;
+          updateUserBadge(currentUser);
+        }
+      } catch (e) {}
+
+      // 2. Load inventory products
+      await loadProducts();
+
+      // 3. Check for deep link
+      checkHashDeepLink();
+    });
+  </script>
+</body>
+</html>
